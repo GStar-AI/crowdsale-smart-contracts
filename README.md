@@ -43,7 +43,7 @@ Refer below for more information about [GStar's Crowdsale][gstar.ai] and the cro
 
 
 ### Dependencies
-'''
+```
 // Install truffle framework and initialize
 $ npm install -g truffle
 $ npm init
@@ -59,7 +59,7 @@ $ npm install
 
 // Install web3
 $ npm install ethereum/web3.js
-'''
+```
 
 
 [gstar.ai]: https://gstar.ai/
