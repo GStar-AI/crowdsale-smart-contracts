@@ -16,7 +16,7 @@
     "babel-register": "^6.26.0",
     "chai-as-promised": "^7.1.1",
     "web3": "github:ethereum/web3.js",
-    "zeppelin-solidity": "^1.7.0"
+    "zeppelin-solidity": "1.7.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

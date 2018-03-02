@@ -3,7 +3,7 @@ pragma solidity ^0.4.18;
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./RefundVault.sol";
-import "./GStarToken.sol";
+//import "./GStarToken.sol";
 
 /**
  * @title GStarCrowdsale
@@ -204,14 +204,6 @@ contract GStarCrowdsale is Ownable {
   */
   function isCrowdsaleActive() public view returns (bool) {
     return crowdsaleActive;
-  }
-
-  /**
-  * @dev Displays the amount of token remaining in this contract.
-  * @return Returns amount of tokens, in wei unit, this contract owns.
-  */
-  function remainingTokens() public view returns (uint256) {
-    return gStarToken.balanceOf(this);
   }
 
 

@@ -2,7 +2,10 @@ pragma solidity ^0.4.18;
 
 import "zeppelin-solidity/contracts/math/SafeMath.sol";
 import "zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./GStarToken.sol";
+
+interface GStarToken {
+  function transfer(address to, uint256 value) public returns (bool);
+}
 
 /**
  * @title RefundVault
@@ -121,7 +124,7 @@ contract RefundVault is Ownable {
   }
 
   function removeFromWhitelist(address beneficiary) external onlyOwner {
-    whitelist[beneficiary];
+    whitelist[beneficiary] = false;
   }
 
 }
