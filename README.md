@@ -2,7 +2,7 @@
 
 Refer below for more information about [GStar's Crowdsale][gstar.ai] and the crowdsale smart contracts.
 
-![GStar.AI](images/logoHeaders.jpg)
+![GStar.AI](images/logosmall.png)
 
 ## Overview
 
