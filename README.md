@@ -134,6 +134,72 @@ function addManyToWhitelist(address[] beneficiaries) public onlyOwner
 function whitelistAndReleaseTokens(address[] beneficiaries) public onlyOwner
 ```
 
+#### GSTAR Crowdsale Events
+**TokenPurchase**
+```javascript
+event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
+```
+
+**GoalReached**
+```javascript
+event GoalReached(uint256 totalEtherAmountRaised);
+```
+
+**OwnershipTransferred**
+```javascript
+event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+```
+
+**StartCrowdsale**
+```javascript
+event StartCrowdsale();
+```
+
+**StopCrowdsale**
+```javascript
+event StopCrowdsale();
+```
+
+**SettlementEnabled**
+```javascript
+event SettlementEnabled();
+```
+
+**SettlementEnded**
+```javascript
+event SettlementEnded();
+```
+
+**RefundClaimed**
+```javascript
+event RefundClaimed(address investor, uint256 etherWeiAmount, bool success);
+```
+
+**TokensClaimed**
+```javascript
+event TokensClaimed(address investor, uint256 tokensWeiAmount);
+```
+
+**Whitelisted**
+```javascript
+event Whitelisted(address beneficiary);
+```
+
+**Delisted**
+```javascript
+event Delisted(address beneficiary);
+```
+
+**AddedMultipleToWhitelist**
+```javascript
+event AddedMultipleToWhitelist(address[] beneficiaries);
+```
+
+**BulkWhitelistAndReleaseTokens**
+```javascript
+event BulkWhitelistAndReleaseTokens(address[] beneficiaries);
+```
+
 
 ### Dependencies
 ```
