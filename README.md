@@ -37,9 +37,102 @@ Refer below for more information about [GStar's Crowdsale][gstar.ai] and the cro
 * The contracts are written in [Solidity][solidity] and tested using [Truffle][truffle] version [4.1.0][truffle_v4.1.0] and [Ganache CLI][ganache].
 * The smart contracts are based on [OpenZeppelin][openzeppelin] framework version [1.7.0][openzeppelin_v1.7.0].
 
-## Smart Contracts
+## Smart Contracts Functions
 
+### GSTAR Tokens Function
 
+**burn**
+```javascript
+function burn(uint256 _value) public onlyOwner
+```
+Allows owner to burn GSTAR tokens.
+
+### GSTAR Crowdsale
+
+**fallback function**
+```javascript
+function () public payable
+```
+
+**buyTokens**
+```javascript
+function buyTokens(address beneficiary) public payable
+```
+
+**getRate**
+```javascript
+function getRate() public view returns (uint256)
+```
+
+**updateFundingGoal**
+```javascript
+function updateFundingGoal() internal returns (bool)
+```
+
+**isFundingGoalReached**
+```javascript
+function isFundingGoalReached() public view returns (bool)
+```
+
+**isCrowdsaleActive**
+```javascript
+function isCrowdsaleActive() public view returns (bool)
+```
+
+**validPurchase**
+```javascript
+function validPurchase() internal view returns (bool)
+```
+
+**startCrowdsale**
+```javascript
+function startCrowdsale() public onlyOwner
+```
+
+**stopCrowdsale**
+```javascript
+function stopCrowdsale() public onlyOwner
+```
+
+**claimTokens**
+```javascript
+function claimTokens() public
+```
+
+**claimRefund**
+```javascript
+function claimRefund() public
+```
+
+**enableSettlement**
+```javascript
+function enableSettlement() public onlyOwner
+```
+
+**endSettlement**
+```javascript
+function endSettlement() public onlyOwner
+```
+
+**addToWhitelist**
+```javascript
+function addToWhitelist(address beneficiary) public onlyOwner
+```
+
+**removeFromWhitelist**
+```javascript
+function removeFromWhitelist(address beneficiary) public onlyOwner
+```
+
+**addManyToWhitelist**
+```javascript
+function addManyToWhitelist(address[] beneficiaries) public onlyOwner
+```
+
+**whitelistAndReleaseTokens**
+```javascript
+function whitelistAndReleaseTokens(address[] beneficiaries) public onlyOwner
+```
 
 
 ### Dependencies
