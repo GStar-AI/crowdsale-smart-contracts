@@ -47,92 +47,103 @@ function burn(uint256 _value) public onlyOwner
 ```
 Allows owner to burn GSTAR tokens.
 
-### GSTAR Crowdsale
-
-**fallback function**
-```javascript
-function () public payable
-```
+### GSTAR Crowdsale Functions
 
 **buyTokens**
 ```javascript
 function buyTokens(address beneficiary) public payable
 ```
+Allows investors to purchase tokens by sending ETH directly to the contract. The fallback function will call the buyTokens function. The ETH received will be forwarded to the RefundVault. Investors can then claim their tokens or refund after the crowdsale ends.
 
 **getRate**
 ```javascript
 function getRate() public view returns (uint256)
 ```
+Returns the number of GSTAR tokens per ETH sent. The rate varies accordingly with the mentioned bonus structure.
 
 **updateFundingGoal**
 ```javascript
 function updateFundingGoal() internal returns (bool)
 ```
+Updates if the funding goal is reached. If the funding goal is reached, no more purchase of tokens is allowed.
 
 **isFundingGoalReached**
 ```javascript
 function isFundingGoalReached() public view returns (bool)
 ```
+Shows if funding goal is reached.
 
 **isCrowdsaleActive**
 ```javascript
 function isCrowdsaleActive() public view returns (bool)
 ```
+Shows if crowdsale is active.
 
 **validPurchase**
 ```javascript
 function validPurchase() internal view returns (bool)
 ```
+Checks if the token purchase is within crowdsale period, if the crowdsale is active, and if the purchase is at least of the minimum amount. If these conditions are not met, investors cannot send ether to the crowdsale contract.
 
 **startCrowdsale**
 ```javascript
 function startCrowdsale() public onlyOwner
 ```
+Allows owner to start/unpause crowdsale.
 
 **stopCrowdsale**
 ```javascript
 function stopCrowdsale() public onlyOwner
 ```
+Allows owner to stop crowdsale or pause crowdsale in case of emergency.
 
 **claimTokens**
 ```javascript
 function claimTokens() public
 ```
+Investors can claim the tokens purchased by simply calling this function after the crowdsale ends. Investors can only claim tokens with the address they send ETH with.
 
 **claimRefund**
 ```javascript
 function claimRefund() public
 ```
+Investors can claim a full amount refund by calling this function after the crowdsale ends. Investors can only claim refund with the address they send ETH with.
 
 **enableSettlement**
 ```javascript
 function enableSettlement() public onlyOwner
 ```
+Closes crowdsale and enable refund and release/claim of tokens.
 
 **endSettlement**
 ```javascript
 function endSettlement() public onlyOwner
 ```
+End settlement period. No more refund or tokens can be claimed.
 
 **addToWhitelist**
 ```javascript
 function addToWhitelist(address beneficiary) public onlyOwner
 ```
+Allows owner to add address to whitelist. Only whitelisted individuals can claim their tokens.
 
 **removeFromWhitelist**
 ```javascript
 function removeFromWhitelist(address beneficiary) public onlyOwner
 ```
+Allows owner to remove address from whitelist.
 
 **addManyToWhitelist**
 ```javascript
 function addManyToWhitelist(address[] beneficiaries) public onlyOwner
 ```
+Allows owner to add multiple addresses to the whitelist.
 
 **whitelistAndReleaseTokens**
 ```javascript
 function whitelistAndReleaseTokens(address[] beneficiaries) public onlyOwner
 ```
+Allows owner to add multiple addresses to the whitelist and release tokens purchased to them.
 
 #### GSTAR Crowdsale Events
 **TokenPurchase**
@@ -199,6 +210,128 @@ event AddedMultipleToWhitelist(address[] beneficiaries);
 ```javascript
 event BulkWhitelistAndReleaseTokens(address[] beneficiaries);
 ```
+
+### RefundVault Functions
+
+**deposit**
+```javascript
+function deposit(address investor, uint256 tokensWeiAmount) onlyOwner external payable
+```
+Deposits investors' ETH to the vault and update their new deposited value for ETH and GSTAR tokens.
+
+**enableSettlement**
+```javascript
+function enableSettlement() onlyOwner external
+```
+Enable refund and claim of tokens.
+
+**endSettlement**
+```javascript
+function endSettlement() onlyOwner external
+```
+End settlement period. No more refund or claim of tokens allowed.
+
+**refund**
+```javascript
+function refund(address investor) onlyOwner external returns (bool)
+```
+Allows investors to claim a full amount refund through the crowdsale contract after the crowdsale ends.
+
+**claimTokens**
+```javascript
+function claimTokens(address investor) onlyOwner external
+```
+Allows investors to claim tokens purchase through the crowdsale contract after the crowdsale ends.
+
+**addToWhitelist**
+```javascript
+function addToWhiteList(address beneficiary) external onlyOwner
+```
+Adds address to whitelist.
+
+**addManyToWhitelist**
+```javascript
+function addManyToWhitelist(address[] beneficiaries) external onlyOwner
+```
+Adds multiple addresses to whitelist.
+
+**whitelistAndReleaseTokens**
+```javascript
+function whitelistAndReleaseTokens(address[] beneficiaries) external onlyOwner
+```
+Adds multiple addresses to whitelist and release tokens purchased for them.
+
+**removeFromWhitelist**
+```javascript
+function removeFromWhitelist(address beneficiary) external onlyOwner
+```
+Remove address from whitelist.
+
+**tokensDeposited**
+```javascript
+function tokensDeposited(address beneficiary) public view returns (uint256)
+```
+Shows the amount of purchased token deposited in the vault for each investor's address.
+
+**etherDeposited**
+```javascript
+function etherDeposited(address beneficiary) public view returns (uint256)
+```
+Shows the amount of ETH deposited in the vault for each investor's address.
+
+**isWhitelisted**
+```javascript
+function isWhitelisted(address beneficiary) public view returns (bool)
+```
+Shows if address is whitelisted.
+
+#### RefundVault Events
+
+**Deposited**
+```javascript
+event Deposited(address investor, uint256 etherWeiAmount, uint256 tokensWeiAmount);
+```
+
+**SettlementEnabled**
+```javascript
+event SettlementEnabled();
+```
+
+**SettlementEnded**
+```javascript
+event SettlementEnded();
+```
+
+**Refunded**
+```javascript
+event Refunded(address indexed beneficiary, uint256 weiAmount);
+```
+
+**TokensClaimed**
+```javascript
+event TokensClaimed(address investor, uint256 tokensWeiAmount);
+```
+
+**Whitelisted**
+```javascript
+event Whitelisted(address beneficiary);
+```
+
+**Delisted**
+```javascript
+event Delisted(address beneficiary);
+```
+
+**AddedMultipleToWhitelist**
+```javascript
+event AddedMultipleToWhitelist(address[] beneficiaries);
+```
+
+**BulkWhitelistAndReleaseTokens**
+```javascript
+event BulkWhitelistAndReleaseTokens(address[] beneficiaries);
+```
+
 
 
 ### Dependencies
