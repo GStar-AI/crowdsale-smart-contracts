@@ -7,6 +7,7 @@ Refer below for more information about [GStar's Crowdsale][gstar.ai] and the cro
 ## Overview
 
 ## Contracts
+The contracts are located in the [contracts](contracts) directory.
 
 ## Crowdsale Specification
 * GSTAR token is ERC-20 compliant.
