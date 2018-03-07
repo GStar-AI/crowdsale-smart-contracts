@@ -17,12 +17,13 @@ contract GSTARAirdrop is Ownable {
     uint256 public decimals = 10**18;
 
     event Dropped(address[] beneficiaries, uint256 tokensAmountEachReceives);
+    event Close();
 
     function GSTARAirdrop(address deployedGStar) public {
         gStarToken = GStarToken(deployedGStar);
     }
 
-    function drop(address[] beneficiaries, uint256 tokensAmountEachReceives) public onlyOwner {
+    function drop(address[] beneficiaries, uint256 tokensAmountEachReceives) external onlyOwner {
         uint256 tokenWeiAmountEachReceives = tokensAmountEachReceives.mul(decimals);
         uint256 totalAmountRequired = beneficiaries.length.mul(tokenWeiAmountEachReceives);
         require(gStarToken.balanceOf(address(this)) >= totalAmountRequired);
@@ -31,5 +32,10 @@ contract GSTARAirdrop is Ownable {
             gStarToken.transfer(beneficiaries[i], tokenWeiAmountEachReceives);
         }
         Dropped(beneficiaries, tokensAmountEachReceives);
+    }
+
+    function close() external onlyOwner {
+        gStarToken.transfer(owner, gStarToken.balanceOf(address(this)));
+        Close();
     }
 }
