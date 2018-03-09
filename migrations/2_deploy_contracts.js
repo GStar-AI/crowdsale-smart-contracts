@@ -15,15 +15,10 @@ module.exports = function(deployer) {
   };
 */
 
+
+    //for testing, do not indicate address
     deployer.deploy(GStarToken).then(function() {
           deployer.deploy(GSTARAirdrop, GStarToken.address);
           return deployer.deploy(GStarCrowdsale, rate, wallet, GStarToken.address);
       });
   };
-
-/*
-  deployer.deploy(GStarToken, {from: "0xd6d0C29d11fa68d9014721B2EABf1c737E4b21dE"}).then(function() {
-        return deployer.deploy(GStarCrowdsale, rate, wallet, GStarToken.address, {from: "0xd6d0C29d11fa68d9014721B2EABf1c737E4b21dE"});
-    });
-};
-*/

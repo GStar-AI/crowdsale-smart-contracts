@@ -11,19 +11,15 @@ import "./GStarToken.sol";
  * @title GStarCrowdsale
  * @dev This contract manages the crowdsale of GStar Tokens.
  * The crowdsale will involve eight key timings - Start time, end time,
- * and the start time of each six phases. In each phase, token buyers
- * will receive different bonuses - The earlier the purchase, the larger
- * the bonuses.
- * Funds collected are forwarded to a RefundVault as they arrive.
- * Buyers can claim their tokens or refund from this crowdsale contract,
- * which will then access the RefundVault contract.
- * There is only one owner at any one time. The owner can stop or start
- * the crowdsale at anytime.
+ * and the start time of each six phases. In each phase, token contributors
+ * will receive different bonuses - The earlier the contribution, the larger the bonuses.
+ * Tokens will be released to the contributors after the crowdsale.
+ * There is only one owner at any one time. The owner can stop or start the crowdsale at anytime.
  */
 contract GStarCrowdsale is WhitelistedCrowdsale {
     using SafeMath for uint256;
 
-    // Start and end timestamps where investments are allowed (both inclusive)
+    // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
     uint256 public startTime = 1520060000;
     uint256 public phaseOne = 1521060000;
@@ -41,14 +37,17 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     // Minimum of ETH contributed during ICO is 0.1ETH
     // Minimum of ETH contributed during pre-ICO is 1ETH
     uint256 public MINIMUM_PURCHASE_AMOUNT_IN_WEI = 10**17;
-    uint256 public PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI = 10**18;
+    uint256 public PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI = 1 ether;
 
     // Total tokens raised so far, bonus inclusive
     uint256 public tokensWeiRaised = 0;
 
-    //Funding goal is 38,000 ETH
-    uint256 public fundingGoal = 10 ether;
+    //Funding goal is 38,000 ETH, includes private contributions
+    uint256 public fundingGoal = 38000 ether;
     bool public fundingGoalReached = false;
+
+    //private contributions
+    uint256 privateContribution = 0;
 
     // Indicates if crowdsale is active
     bool public crowdsaleActive = false;
@@ -104,7 +103,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         }
         super._preValidatePurchase(_beneficiary, _weiAmount);
         require(msg.sender == _beneficiary);
-        require(_weiAmount.add(weiRaised) <= fundingGoal);
+        require(_weiAmount.add(weiRaised).add(privateContribution) <= fundingGoal);
         require(withinPeriod);
         require(atLeastMinimumAmount);
         require(crowdsaleActive);
@@ -162,6 +161,14 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
             fundingGoalReached = true;
             GoalReached(weiRaised);
         }
+    }
+
+    /**
+    * @dev Change the private contribution, in ether, wei units.
+    * Private contribution amount will be calculated into funding goal.
+    */
+    function changePrivateContribution(uint256 etherWeiAmount) external onlyOwner {
+      uint256 privateContribution = etherWeiAmount;
     }
 
     /**
