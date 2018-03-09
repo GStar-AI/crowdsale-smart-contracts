@@ -200,7 +200,10 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         TokenReleaseDisabled();
     }
 
-
+    /**
+    * @dev Release tokens to multiple addresses.
+    * @param contributors Addresses to release tokens to
+    */
     function releaseTokens(address[] contributors) external onlyOwner {
         for (uint256 i = 0; i < contributors.length; i++) {
 
@@ -216,6 +219,9 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         }
     }
 
+    /**
+    * @dev Stops crowdsale and release of tokens. Transfer remainining tokens back to owner.
+    */
     function close() external onlyOwner {
         crowdsaleActive = false;
         canTokenRelease = false;
