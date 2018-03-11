@@ -1,10 +1,14 @@
 # GSTAR.AI Crowdsale Contracts
 
-Refer below for more information about [GStar's Crowdsale][gstar.ai] and the crowdsale smart contracts.
+This repository explains the technical details regarding [GStar's Crowdsale][gstar.ai] and the crowdsale smart contracts involved.
 
 ![GStar.AI](images/logosmall.png)
 
+GSTAR is an ERC-20 compliant cryptocurrency built on the Ethereum blockchain network.
+
 ## Overview
+
+
 
 ## Contracts
 The contracts are located in the [contracts](contracts) directory.
@@ -39,6 +43,13 @@ The contracts are located in the [contracts](contracts) directory.
 * The smart contracts are based on [OpenZeppelin][openzeppelin] framework version [1.7.0][openzeppelin_v1.7.0].
 
 ## Smart Contracts Code
+
+### Class Diagram
+
+The diagram below shows the inheritance relationship between the contracts used to create the GSTAR Crowdsale contract and the GSTAR Token contract.
+
+![Class Diagram](images/classdiagram.png)
+
 
 ### GSTAR Tokens Function
 
