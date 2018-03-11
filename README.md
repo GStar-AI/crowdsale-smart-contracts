@@ -38,7 +38,7 @@ The contracts are located in the [contracts](contracts) directory.
 * The contracts are written in [Solidity][solidity] and tested using [Truffle][truffle] version [4.1.0][truffle_v4.1.0] and [Ganache CLI][ganache].
 * The smart contracts are based on [OpenZeppelin][openzeppelin] framework version [1.7.0][openzeppelin_v1.7.0].
 
-## Smart Contracts Functions
+## Smart Contracts Code
 
 ### GSTAR Tokens Function
 
@@ -50,11 +50,23 @@ Allows owner to burn GSTAR tokens.
 
 ### GSTAR Crowdsale Functions
 
-**buyTokens**
+**_preValidatePurchase**
 ```javascript
-function buyTokens(address beneficiary) public payable
+function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal isWhitelisted(_beneficiary)
 ```
-Allows investors to purchase tokens by sending ETH directly to the contract. The fallback function will call the buyTokens function. The ETH received will be forwarded to the RefundVault. Investors can then claim their tokens or refund after the crowdsale ends.
+Overrode the function from Crowdsale.sol from OpenZeppelin. Check if the contribution is valid before the actual contribution is made. The following checks are made:
+* Contribution is within crowdsale period.
+* Crowdsale is active.
+* Contributor and beneficiary are the same address.
+* Contribution does not exceed funding goal.
+* Contribution is at least of minimum amount.
+* Contributor is whitelisted.
+
+**_getTokenAmount**
+```javascript
+function _getTokenAmount(uint256 _weiAmount) internal view returns (uint256)
+```
+Returns the token amount based on the ETH contributed.
 
 **getRate**
 ```javascript
@@ -62,91 +74,81 @@ function getRate() public view returns (uint256)
 ```
 Returns the number of GSTAR tokens per ETH sent. The rate varies accordingly with the mentioned bonus structure.
 
+**_updatePurchasingState**
+```javascript
+function _updatePurchasingState(address _beneficiary, uint256 _weiAmount) internal
+```
+Updates the token amount attributed to the contributor based on the ETH contributed, then updates funding goal.
+
 **updateFundingGoal**
 ```javascript
-function updateFundingGoal() internal returns (bool)
+function updateFundingGoal() internal
 ```
 Updates if the funding goal is reached. If the funding goal is reached, no more purchase of tokens is allowed.
 
-**isFundingGoalReached**
+**changePrivateContribution**
 ```javascript
-function isFundingGoalReached() public view returns (bool)
+function changePrivateContribution(uint256 etherWeiAmount) external onlyOwner
 ```
-Shows if funding goal is reached.
-
-**isCrowdsaleActive**
-```javascript
-function isCrowdsaleActive() public view returns (bool)
-```
-Shows if crowdsale is active.
-
-**validPurchase**
-```javascript
-function validPurchase() internal view returns (bool)
-```
-Checks if the token purchase is within crowdsale period, if the crowdsale is active, and if the purchase is at least of the minimum amount. If these conditions are not met, investors cannot send ether to the crowdsale contract.
+Allows owner to change the private contribution amount. This amount is included in the calculation of the funding goal.
 
 **startCrowdsale**
 ```javascript
-function startCrowdsale() public onlyOwner
+function startCrowdsale() external onlyOwner
 ```
 Allows owner to start/unpause crowdsale.
 
 **stopCrowdsale**
 ```javascript
-function stopCrowdsale() public onlyOwner
+function stopCrowdsale() external onlyOwner
 ```
-Allows owner to stop crowdsale or pause crowdsale in case of emergency.
+Allows owner to stop/pause crowdsale.
 
-**claimTokens**
-```javascript
-function claimTokens() public
-```
-Investors can claim the tokens purchased by simply calling this function after the crowdsale ends. Investors can only claim tokens with the address they send ETH with.
 
-**claimRefund**
+**enableTokenRelease**
 ```javascript
-function claimRefund() public
+function enableTokenRelease() external onlyOwner
 ```
-Investors can claim a full amount refund by calling this function after the crowdsale ends. Investors can only claim refund with the address they send ETH with.
+Allows owner to enable token release.
 
-**enableSettlement**
+**disableTokenRelease**
 ```javascript
-function enableSettlement() public onlyOwner
+function disableTokenRelease() external onlyOwner
 ```
-Closes crowdsale and enable refund and release/claim of tokens.
+Allows owner to disable token release.
 
-**endSettlement**
+**releaseTokens**
 ```javascript
-function endSettlement() public onlyOwner
+function releaseTokens(address[] contributors) external onlyOwner
 ```
-End settlement period. No more refund or tokens can be claimed.
+Release tokens to the addresses in put based on the recorded tokens amount for each contributor.
+
+**close**
+```javascript
+function close() external onlyOwner
+```
+Allows owner to stop crowdsale and token release, then transfers any remaining tokens in the contract back to the owner. This also prevents any tokens being stuck in the contract.
 
 **addToWhitelist**
 ```javascript
-function addToWhitelist(address beneficiary) public onlyOwner
+function addToWhitelist(address _beneficiary) external onlyOwner
 ```
-Allows owner to add address to whitelist. Only whitelisted individuals can claim their tokens.
+Inherited from WhitelistedCrowdsale.sol from OpenZeppelin. Allows owner to whitelist a single address.
 
 **removeFromWhitelist**
 ```javascript
-function removeFromWhitelist(address beneficiary) public onlyOwner
+function removeFromWhitelist(address _beneficiary) external onlyOwner
 ```
-Allows owner to remove address from whitelist.
+Inherited from WhitelistedCrowdsale.sol from OpenZeppelin. Allows owner to remove a single address from the whitelist.
 
 **addManyToWhitelist**
 ```javascript
-function addManyToWhitelist(address[] beneficiaries) public onlyOwner
+function addManyToWhitelist(address[] _beneficiaries) external onlyOwner
 ```
-Allows owner to add multiple addresses to the whitelist.
+Inherited from WhitelistedCrowdsale.sol from OpenZeppelin. Allows owner to whitelist multiple addresses.
 
-**whitelistAndReleaseTokens**
-```javascript
-function whitelistAndReleaseTokens(address[] beneficiaries) public onlyOwner
-```
-Allows owner to add multiple addresses to the whitelist and release tokens purchased to them.
 
-#### GSTAR Crowdsale Events
+#### GSTAR Crowdsale Contract Events
 **TokenPurchase**
 ```javascript
 event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
@@ -155,11 +157,6 @@ event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint
 **GoalReached**
 ```javascript
 event GoalReached(uint256 totalEtherAmountRaised);
-```
-
-**OwnershipTransferred**
-```javascript
-event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 ```
 
 **StartCrowdsale**
@@ -172,167 +169,25 @@ event StartCrowdsale();
 event StopCrowdsale();
 ```
 
-**SettlementEnabled**
+**TokenReleaseEnabled**
 ```javascript
-event SettlementEnabled();
+event TokenReleaseEnabled();
 ```
 
-**SettlementEnded**
+**TokenReleaseDisabled**
 ```javascript
-event SettlementEnded();
+event TokenReleaseDisabled();
 ```
 
-**RefundClaimed**
+**ReleaseTokens**
 ```javascript
-event RefundClaimed(address investor, uint256 etherWeiAmount, bool success);
+event ReleaseTokens(address[] _beneficiaries);
 ```
 
-**TokensClaimed**
+**Close**
 ```javascript
-event TokensClaimed(address investor, uint256 tokensWeiAmount);
+event Close();
 ```
-
-**Whitelisted**
-```javascript
-event Whitelisted(address beneficiary);
-```
-
-**Delisted**
-```javascript
-event Delisted(address beneficiary);
-```
-
-**AddedMultipleToWhitelist**
-```javascript
-event AddedMultipleToWhitelist(address[] beneficiaries);
-```
-
-**BulkWhitelistAndReleaseTokens**
-```javascript
-event BulkWhitelistAndReleaseTokens(address[] beneficiaries);
-```
-
-### RefundVault Functions
-
-**deposit**
-```javascript
-function deposit(address investor, uint256 tokensWeiAmount) onlyOwner external payable
-```
-Deposits investors' ETH to the vault and update their new deposited value for ETH and GSTAR tokens.
-
-**enableSettlement**
-```javascript
-function enableSettlement() onlyOwner external
-```
-Enable refund and claim of tokens.
-
-**endSettlement**
-```javascript
-function endSettlement() onlyOwner external
-```
-End settlement period. No more refund or claim of tokens allowed.
-
-**refund**
-```javascript
-function refund(address investor) onlyOwner external returns (bool)
-```
-Allows investors to claim a full amount refund through the crowdsale contract after the crowdsale ends.
-
-**claimTokens**
-```javascript
-function claimTokens(address investor) onlyOwner external
-```
-Allows investors to claim tokens purchase through the crowdsale contract after the crowdsale ends.
-
-**addToWhitelist**
-```javascript
-function addToWhiteList(address beneficiary) external onlyOwner
-```
-Adds address to whitelist.
-
-**addManyToWhitelist**
-```javascript
-function addManyToWhitelist(address[] beneficiaries) external onlyOwner
-```
-Adds multiple addresses to whitelist.
-
-**whitelistAndReleaseTokens**
-```javascript
-function whitelistAndReleaseTokens(address[] beneficiaries) external onlyOwner
-```
-Adds multiple addresses to whitelist and release tokens purchased for them.
-
-**removeFromWhitelist**
-```javascript
-function removeFromWhitelist(address beneficiary) external onlyOwner
-```
-Remove address from whitelist.
-
-**tokensDeposited**
-```javascript
-function tokensDeposited(address beneficiary) public view returns (uint256)
-```
-Shows the amount of purchased token deposited in the vault for each investor's address.
-
-**etherDeposited**
-```javascript
-function etherDeposited(address beneficiary) public view returns (uint256)
-```
-Shows the amount of ETH deposited in the vault for each investor's address.
-
-**isWhitelisted**
-```javascript
-function isWhitelisted(address beneficiary) public view returns (bool)
-```
-Shows if address is whitelisted.
-
-#### RefundVault Events
-
-**Deposited**
-```javascript
-event Deposited(address investor, uint256 etherWeiAmount, uint256 tokensWeiAmount);
-```
-
-**SettlementEnabled**
-```javascript
-event SettlementEnabled();
-```
-
-**SettlementEnded**
-```javascript
-event SettlementEnded();
-```
-
-**Refunded**
-```javascript
-event Refunded(address indexed beneficiary, uint256 weiAmount);
-```
-
-**TokensClaimed**
-```javascript
-event TokensClaimed(address investor, uint256 tokensWeiAmount);
-```
-
-**Whitelisted**
-```javascript
-event Whitelisted(address beneficiary);
-```
-
-**Delisted**
-```javascript
-event Delisted(address beneficiary);
-```
-
-**AddedMultipleToWhitelist**
-```javascript
-event AddedMultipleToWhitelist(address[] beneficiaries);
-```
-
-**BulkWhitelistAndReleaseTokens**
-```javascript
-event BulkWhitelistAndReleaseTokens(address[] beneficiaries);
-```
-
 
 
 ### Dependencies

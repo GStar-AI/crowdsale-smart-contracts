@@ -61,8 +61,6 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     event GoalReached(uint256 totalEtherAmountRaised);
     event StartCrowdsale();
     event StopCrowdsale();
-    event SettlementEnabled();
-    event SettlementEnded();
     event TokenReleaseEnabled();
     event TokenReleaseDisabled();
     event ReleaseTokens(address[] _beneficiaries);
