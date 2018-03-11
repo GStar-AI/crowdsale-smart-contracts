@@ -1,38 +1,31 @@
 import ether from '../helpers/ether';
 
 const BigNumber = web3.BigNumber;
-const utils = require('../helpers/Utils');
 
 require('chai')
   .use(require('chai-as-promised'))
   .should();
 
-const GStarCrowdsale = artifacts.require('GStarCrowdsale');
+const WhitelistedCrowdsale = artifacts.require('WhitelistedCrowdsaleImpl');
 const GStarToken = artifacts.require('GStarToken');
 
-contract('GStarCrowdsale', function ([_, wallet, accounts]) {
-    let token;
-    let crowdsale;
-    const rate = 10000;
-    const value = ether(10);
-    const tokenSupply = ether(800000000);
-    let owner = web3.eth.accounts[0];
-    let authorized = web3.eth.accounts[1];
-    let unauthorized = web3.eth.accounts[2];
-    let anotherAuthorized = web3.eth.accounts[3];
+contract('WhitelistedCrowdsale', function ([_, wallet, authorized, unauthorized, anotherAuthorized]) {
+  const rate = 1;
+  const value = ether(1);
+  const tokenSupply = new BigNumber('1e22');
 
   describe('single user whitelisting', function () {
     beforeEach(async function () {
       this.token = await GStarToken.new();
-      this.crowdsale = await GStarCrowdsale.new(rate, wallet, this.token.address, { from: owner });
-      await this.crowdsale.addToWhitelist(authorized, {from: owner});
-      await this.crowdsale.startCrowdsale({from: owner });
+      this.crowdsale = await WhitelistedCrowdsale.new(rate, wallet, this.token.address);
+      await this.token.transfer(this.crowdsale.address, tokenSupply);
+      await this.crowdsale.addToWhitelist(authorized);
     });
 
     describe('accepting payments', function () {
       it('should accept payments to whitelisted (from whichever buyers)', async function () {
         await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
-        await this.crowdsale.buyTokens(authorized, { value: value, from: unauthorized }).should.be.rejected;
+        await this.crowdsale.buyTokens(authorized, { value: value, from: unauthorized }).should.be.fulfilled;
       });
 
       it('should reject payments to not whitelisted (from whichever buyers)', async function () {
@@ -60,17 +53,17 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
   describe('many user whitelisting', function () {
     beforeEach(async function () {
       this.token = await GStarToken.new();
-      this.crowdsale = await GStarCrowdsale.new(rate, wallet, this.token.address);
-      await this.crowdsale.addManyToWhitelist([authorized, anotherAuthorized], {from: owner});
-      await this.crowdsale.startCrowdsale({from: owner });
+      this.crowdsale = await WhitelistedCrowdsale.new(rate, wallet, this.token.address);
+      await this.token.transfer(this.crowdsale.address, tokenSupply);
+      await this.crowdsale.addManyToWhitelist([authorized, anotherAuthorized]);
     });
 
     describe('accepting payments', function () {
       it('should accept payments to whitelisted (from whichever buyers)', async function () {
         await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
-        await this.crowdsale.buyTokens(authorized, { value: value, from: unauthorized }).should.be.rejected;
-        await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: authorized }).should.be.rejected;
-        await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: unauthorized }).should.be.rejected;
+        await this.crowdsale.buyTokens(authorized, { value: value, from: unauthorized }).should.be.fulfilled;
+        await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: authorized }).should.be.fulfilled;
+        await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: unauthorized }).should.be.fulfilled;
       });
 
       it('should reject payments to not whitelisted (with whichever buyers)', async function () {
