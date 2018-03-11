@@ -10,9 +10,8 @@ import "./GStarToken.sol";
 /**
  * @title GStarCrowdsale
  * @dev This contract manages the crowdsale of GStar Tokens.
- * The crowdsale will involve eight key timings - Start time, end time,
- * and the start time of each six phases. In each phase, token contributors
- * will receive different bonuses - The earlier the contribution, the larger the bonuses.
+ * The crowdsale will involve three key timings - Start of Pre-fund, start time, end time,
+ * The earlier the contribution, the larger the bonuses. (according to the bonus structure)
  * Tokens will be released to the contributors after the crowdsale.
  * There is only one owner at any one time. The owner can stop or start the crowdsale at anytime.
  */
@@ -21,14 +20,9 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
-    uint256 public startTime = 1520060000;
-    uint256 public phaseOne = 1521060000;
-    uint256 public phaseTwo = 1522060000;
-    uint256 public phaseThree = 1523060000;
-    uint256 public phaseFour = 1524060000;
-    uint256 public phaseFive = 1525060000;
-    uint256 public phaseSix = 1526060000;
-    uint256 public endTime = 1528060000;
+    uint256 public prefundStart;
+    uint256 public startTime;
+    uint256 public endTime;
 
     // Keeps track of contributors tokens
     mapping (address => uint256) public depositedTokens;
@@ -47,7 +41,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     bool public fundingGoalReached = false;
 
     //private contributions
-    uint256 privateContribution = 0;
+    uint256 public privateContribution = 0;
 
     // Indicates if crowdsale is active
     bool public crowdsaleActive = false;
@@ -69,17 +63,25 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     /**
     * @dev Constructor. Checks validity of the time entered.
     */
-    function GStarCrowdsale(uint256 _rate, address _wallet, GStarToken token) public
-    Crowdsale(_rate, _wallet, token) {
-        require(startTime < phaseOne);
-        require(phaseOne < phaseTwo);
-        require(phaseTwo < phaseThree);
-        require(phaseThree < phaseFour);
-        require(phaseFour < phaseFive);
-        require(phaseFive < phaseSix);
-        require(phaseSix < endTime);
+    function GStarCrowdsale(
+        uint256 _prefundStart,
+        uint256 _startTime,
+        uint256 _endTime,
+        uint256 _rate,
+        address _wallet,
+        GStarToken token
+        ) public Crowdsale(_rate, _wallet, token) {
 
-        require(fundingGoal > 0);
+        require(_prefundStart != 0);
+        require(_startTime != 0);
+        require(_endTime != 0);
+        //crowdsale is at least a month long, excluding pre-fund period
+        require(_startTime.add(4 weeks) <= _endTime);
+        require(_prefundStart < _startTime);
+
+        prefundStart = _prefundStart;
+        startTime = _startTime;
+        endTime = _endTime;
     }
 
     /**
@@ -93,15 +95,15 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * The minimum purchase amount for Pre-ICO is different from ICO.
     */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal isWhitelisted(_beneficiary) {
-        bool withinPeriod = now >= startTime && now <= endTime;
+        bool withinPeriod = now >= prefundStart && now <= endTime;
         bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
 
-        if(now >= startTime && now < phaseOne) {
+        if(now >= prefundStart && now < startTime) {
             atLeastMinimumAmount = _weiAmount >= PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI;
         }
         super._preValidatePurchase(_beneficiary, _weiAmount);
         require(msg.sender == _beneficiary);
-        require(_weiAmount.add(weiRaised).add(privateContribution) <= fundingGoal);
+        require(_weiAmount.add(weiRaised.add(privateContribution)) <= fundingGoal);
         require(withinPeriod);
         require(atLeastMinimumAmount);
         require(crowdsaleActive);
@@ -122,14 +124,14 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @return Rate of amount of GSTAR per Ether as of current time.
     */
     function getRate() public view returns (uint256) {
-        //calculate bonus based on phases
-        if(now >= startTime && now < phaseOne) {return 12000;}
-        else if(now >= phaseOne && now < phaseTwo) {return 11500;}
-        else if(now >= phaseTwo && now < phaseThree) {return 11200;}
-        else if(now >= phaseThree && now < phaseFour) {return 10800;}
-        else if(now >= phaseFour && now < phaseFive) {return 10400;}
-        else if(now >= phaseFive && now < phaseSix) {return 10200;}
-        else if(now >= phaseSix && now < endTime) {return 10000;}
+        //calculate bonus based on timing
+        if(now <= startTime) {return 12000;} //pre-fund period
+        if(now <= startTime.add(1 days)) {return 11500;}
+        if(now <= startTime.add(3 days)) {return 11200;}
+        if(now <= startTime.add(7 days)) {return 10800;}
+        if(now <= startTime.add(2 weeks)) {return 10400;}
+        if(now <= startTime.add(3 weeks)) {return 10200;}
+        if(now <= startTime.add(4 weeks)) {return rate;}
 
         return rate;
     }
@@ -166,7 +168,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Private contribution amount will be calculated into funding goal.
     */
     function changePrivateContribution(uint256 etherWeiAmount) external onlyOwner {
-      uint256 privateContribution = etherWeiAmount;
+      privateContribution = etherWeiAmount;
     }
 
     /**
