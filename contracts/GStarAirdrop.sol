@@ -20,10 +20,14 @@ contract GSTARAirdrop is Ownable {
     event Close();
 
     function GSTARAirdrop(address deployedGStar) public {
+        require(deployedGStar != address(0));
+
         gStarToken = GStarToken(deployedGStar);
     }
 
     function drop(address[] beneficiaries, uint256 tokensAmountEachReceives) external onlyOwner {
+        require(beneficiaries.length > 0);
+        require(tokensAmountEachReceives > 0);
         uint256 tokenWeiAmountEachReceives = tokensAmountEachReceives.mul(decimals);
         uint256 totalAmountRequired = beneficiaries.length.mul(tokenWeiAmountEachReceives);
         require(gStarToken.balanceOf(address(this)) >= totalAmountRequired);
