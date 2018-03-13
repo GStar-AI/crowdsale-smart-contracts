@@ -23,11 +23,18 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     const belowMinimumValue = ether(0.09);
     const tokenSupply = new BigNumber('8e26');
     const expectedTokenAmount = rate.mul(value);
-    let owner = web3.eth.accounts[0];
-    let authorized = web3.eth.accounts[1];
-    let unauthorized = web3.eth.accounts[2];
-    let anotherAuthorized = web3.eth.accounts[3];
 
+    const owner = web3.eth.accounts[0];
+    const authorized = web3.eth.accounts[1];
+    const unauthorized = web3.eth.accounts[2];
+    const anotherAuthorized = web3.eth.accounts[3];
+
+    /*
+    const owner = accounts[0];
+    const authorized = accounts[1];
+    const unauthorized = accounts[2];
+    const anotherAuthorized = accounts[3];
+    */
     before(async function() {
         await advanceBlock();
     });
@@ -399,5 +406,169 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             });
         });
 
+    });
+
+    describe('gas consumption for looping functions', function () {
+
+        it('add a single address to whitelist with address input', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.addToWhitelist(web3.eth.accounts[2], {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Adding a single address to whitelist with address input");
+                console.log("        Gas Used for addToWhitelist        : " + gasUsed);
+            })
+        });
+
+        it('add a single address to whitelist with array input', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 1; //1 accounts
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.addManyToWhitelist(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Adding a single address to whitelist with array input");
+                console.log("        Gas Used for addManyToWhitelist        : " + gasUsed);
+            })
+        });
+
+        it('add 100 addresses to whitelist', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 100; //100 accounts
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.addManyToWhitelist(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Adding 100 to whitelist");
+                console.log("        Gas Used for addManyToWhitelist        : " + gasUsed);
+            })
+        });
+
+        it('add 200 addresses to whitelist', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 200; //100 accounts
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.addManyToWhitelist(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Adding 200 to whitelist");
+                console.log("        Gas Used for addManyToWhitelist        : " + gasUsed);
+            })
+        });
+
+        it('single transfer of tokens', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+
+            return GStarToken.deployed().then(function(instance) {
+                return instance.transfer(web3.eth.accounts[2], (value * rate), {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Single direct transfer of tokens");
+                console.log("        Gas Used for transfer        : " + gasUsed);
+            });
+        });
+
+        it('release tokens for a single address', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 1; //1 account
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
+
+            for(let i = 0; i < length; i++) {
+                await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
+            }
+            await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
+            await this.crowdsale.enableTokenRelease({from: owner});
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Release Tokens for single address");
+                console.log("        Gas Used for ReleaseTokens        : " + gasUsed);
+            });
+        });
+
+        it('release tokens to 100 addresses', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 100; //100 accounts
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
+
+            for(let i = 0; i < length; i++) {
+                await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
+            }
+            await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
+            await this.crowdsale.enableTokenRelease({from: owner});
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Release Tokens for 100 address");
+                console.log("        Gas Used for ReleaseTokens        : " + gasUsed);
+            })
+        });
+
+        it('release tokens to 200 addresses', async function () {
+            await increaseTimeTo(this.startTime + duration.seconds(1));
+            let accountArray = [];
+            const length = 200; //200 accounts
+
+            for(let i = 0; i < length; i++) {
+                accountArray.push(web3.eth.accounts[i%10]);
+            }
+
+            await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
+
+            for(let i = 0; i < length; i++) {
+                await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
+            }
+            await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
+            await this.crowdsale.enableTokenRelease({from: owner});
+            return GStarCrowdsale.deployed().then(function(instance) {
+                return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
+            }).then(function(result) {
+                var gasUsed = new BigNumber(result.receipt.gasUsed);
+                console.log("");
+                console.log("        Release Tokens for 200 address");
+                console.log("        Gas Used for ReleaseTokens        : " + gasUsed);
+            });
+        });
     });
 });
