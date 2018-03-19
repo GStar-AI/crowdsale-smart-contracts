@@ -7,7 +7,9 @@ This repository explains the technical details regarding [GStar's Crowdsale][gst
 GSTAR is an ERC-20 compliant cryptocurrency built on the Ethereum blockchain network.
 
 ## Overview
+GStar Technologies aims to empower the masses to be able to use AI technologies in the fields of trading, thus leveling the playing field that had largely kept profitable trading out of reach of the masses. This further fuels the gig economy, where people can now earn a living based on their own terms as traditional jobs gets disrupted in this new technological world.
 
+GStar Technologies is holding a crowdsale for GSTAR Tokens which will be used to facilitate transactions on the trading platform. The section below explains some of the technical details with regards to the crowdsale.
 
 
 ## Contracts
