@@ -11,7 +11,7 @@ contract GStarToken is StandardToken, Ownable {
     string public constant symbol = "GSTAR";
     uint8 public constant decimals = 18;
 
-    uint256 public constant INITIAL_SUPPLY = 800000000 * ((10 ** uint256(decimals)));
+    uint256 public constant INITIAL_SUPPLY = 1600000000 * ((10 ** uint256(decimals)));
     uint256 public current_total_supply = 0;
 
     event RaiseCap(address owner, uint256 SUPPLY_CAP);

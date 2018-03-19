@@ -17,7 +17,7 @@ const GStarToken = artifacts.require('GStarToken');
 const GSTARAirdrop = artifacts.require('GSTARAirdrop');
 
 contract('GSTARAirdrop', function () {
-    const dropAmount = 300;
+    const dropAmount = 400;
     const supplyAmount = 20000;
     let owner = web3.eth.accounts[0];
     let firstReceiver = web3.eth.accounts[1];
@@ -32,14 +32,14 @@ contract('GSTARAirdrop', function () {
     describe('close function', function () {
 
         it('transfers remaining tokens back to owner', async function () {
-            let initialBalance = await this.token.balanceOf(owner);
-            await this.token.transfer(this.airdrop.address, ether(supplyAmount), {from: owner});
-            let expectedValue = initialBalance - ether(dropAmount * 3);
+            await this.token.transfer(web3.eth.accounts[4], 1.6e27, {from: owner}); //owner transfers all tokens out
+            await this.token.transfer(this.airdrop.address, ether(supplyAmount), {from: web3.eth.accounts[4]});
+            let expected = ether(supplyAmount) - ether(dropAmount * 3);
             await this.airdrop.drop([firstReceiver, secondReceiver, thirdReceiver], dropAmount, {from: owner});
             await this.airdrop.close({from: owner});
-            let balance = await this.token.balanceOf(owner);
-            balance.should.be.bignumber.equal(expectedValue);
+            let afterBalance = await this.token.balanceOf(owner);
 
+            afterBalance.should.be.bignumber.equal(expected);
         });
     });
 
