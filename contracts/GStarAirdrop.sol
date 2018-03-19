@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 import "./math/SafeMath.sol";
 import "./ownership/Ownable.sol";
@@ -29,7 +29,9 @@ contract GSTARAirdrop is Ownable {
         require(beneficiaries.length > 0);
         require(tokensAmountEachReceives > 0);
         uint256 tokenWeiAmountEachReceives = tokensAmountEachReceives.mul(decimals);
+
         uint256 totalAmountRequired = beneficiaries.length.mul(tokenWeiAmountEachReceives);
+
         require(gStarToken.balanceOf(address(this)) >= totalAmountRequired);
 
         for (uint256 i = 0; i < beneficiaries.length; i++) {

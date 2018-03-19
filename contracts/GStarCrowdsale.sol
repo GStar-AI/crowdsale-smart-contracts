@@ -1,4 +1,4 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.19;
 
 import "./math/SafeMath.sol";
 import "./ownership/Ownable.sol";
@@ -212,17 +212,23 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @param contributors Addresses to release tokens to
     */
     function releaseTokens(address[] contributors) external onlyOwner {
-        for (uint256 i = 0; i < contributors.length; i++) {
+
+        for (uint256 j = 0; j < contributors.length; j++) {
 
             // the amount of tokens to be distributed to contributor
-            uint256 tokensAmount = depositedTokens[contributors[i]];
+            uint256 tokensAmount = depositedTokens[contributors[j]];
 
-            //ensure that there is enough tokens to distribute
+            //require the address to have sufficient tokens to deliver the tokens
             require(token.balanceOf(address(this)) >= tokensAmount);
-            super._deliverTokens(contributors[i], tokensAmount);
+            
+            if(tokensAmount > 0) {
+                super._deliverTokens(contributors[j], tokensAmount);
 
-            depositedTokens[contributors[i]] = 0;
-            tokensReleasedAmount = tokensReleasedAmount.add(tokensAmount);
+                depositedTokens[contributors[j]] = 0;
+
+                //update state of release
+                tokensReleasedAmount = tokensReleasedAmount.add(tokensAmount);
+            }
         }
     }
 
