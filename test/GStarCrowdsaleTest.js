@@ -144,6 +144,35 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     });
 
     describe('high level contribution process', function() {
+
+        it('tokens should not deliver when there is lack of tokens (single contributor)', async function () {
+            await increaseTimeTo(this.prefundStart);
+
+            await this.crowdsale.sendTransaction({value: value, from: authorized});
+            await this.crowdsale.buyTokens(authorized, { value: value, from: authorized });
+
+            await this.crowdsale.enableTokenRelease({from: owner});
+            let currentRate = await this.crowdsale.getRate();
+            let tokenValue = value * currentRate * 2;
+            let transferValue = tokenValue - ether(0.00000000001);
+            await this.token.transfer(this.crowdsale.address, transferValue, {from: owner});
+            await this.crowdsale.releaseTokens([authorized], {from: owner}).should.be.rejected;
+        });
+
+        it('tokens should not deliver when there is lack of tokens (multiple contributors)', async function () {
+            await increaseTimeTo(this.prefundStart);
+
+            await this.crowdsale.sendTransaction({value: value, from: authorized});
+            await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized});
+
+            await this.crowdsale.enableTokenRelease({from: owner});
+            let currentRate = await this.crowdsale.getRate();
+            let tokenValue = value * currentRate * 2;
+            let transferValue = tokenValue - ether(0.00000000001);
+            await this.token.transfer(this.crowdsale.address, transferValue, {from: owner});
+            await this.crowdsale.releaseTokens([authorized, anotherAuthorized], {from: owner}).should.be.rejected;
+        });
+
         it('prefund contribution, tokens delivered', async function () {
             await increaseTimeTo(this.prefundStart);
 
@@ -170,17 +199,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             let balance = await this.token.balanceOf(anotherAuthorized);
             let expectedValue = value * 11500 * 2;
             balance.should.be.bignumber.equal(expectedValue);
-        });
-
-        it('tokens should not deliver when there is lack of tokens', async function () {
-            await increaseTimeTo(this.startTime);
-
-            await this.crowdsale.sendTransaction({value: value, from: authorized});
-            await this.crowdsale.buyTokens(authorized, { value: value, from: authorized });
-            await this.crowdsale.enableTokenRelease({from: owner});
-            let tokenValue = value * 12000 * 2;
-            await this.token.transfer(this.crowdsale.address, (value - 1), {from: owner});
-            await this.crowdsale.releaseTokens([authorized], {from: owner}).should.be.rejected;
         });
     });
 
@@ -408,6 +426,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
     });
 
+
     describe('gas consumption for looping functions', function () {
 
         it('add a single address to whitelist with address input', async function () {
@@ -504,6 +523,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
             await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
 
+            //sending funds to simulate contributing
             for(let i = 0; i < length; i++) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
@@ -530,7 +550,8 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
             await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
 
-            for(let i = 0; i < length; i++) {
+            //sending funds to simulate contributing
+            for(let i = 0; i < 10; i++) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
             await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
@@ -556,7 +577,8 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
             await this.crowdsale.addManyToWhitelist(accountArray, {from: owner});
 
-            for(let i = 0; i < length; i++) {
+            //sending funds to simulate contributing
+            for(let i = 0; i < 10; i++) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
             await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
