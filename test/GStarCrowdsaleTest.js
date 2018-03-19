@@ -21,7 +21,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     const value = ether(1.5);
     const belowPrefundMinimumValue = ether(0.9);
     const belowMinimumValue = ether(0.09);
-    const tokenSupply = new BigNumber('8e26');
+    const tokenSupply = new BigNumber('1.6e27');
     const expectedTokenAmount = rate.mul(value);
 
     const owner = web3.eth.accounts[0];
@@ -29,12 +29,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     const unauthorized = web3.eth.accounts[2];
     const anotherAuthorized = web3.eth.accounts[3];
 
-    /*
-    const owner = accounts[0];
-    const authorized = accounts[1];
-    const unauthorized = accounts[2];
-    const anotherAuthorized = accounts[3];
-    */
     before(async function() {
         await advanceBlock();
     });
@@ -66,6 +60,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
     describe('prevalidation of token contribution', function () {
         describe('should accept payments', function () {
+
             it('from whitelisted contributors during prefund period', async function () {
                 await increaseTimeTo(this.prefundStart);
 
@@ -82,10 +77,19 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             it('when contribution will equate weiRaised to funding goal', async function () {
                 await increaseTimeTo(this.startTime);
 
-                await this.crowdsale.changePrivateContribution(ether(37996.1), {from: owner});
+                await this.crowdsale.changePrivateContribution(ether(37997), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
             });
+
+            it('when contribution will equate weiRaised to funding goal', async function () {
+                await increaseTimeTo(this.prefundStart);
+
+                await this.crowdsale.changePrivateContribution(ether(2997), {from: owner});
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
+            });
+
         });
 
         describe('should not accept payments', function () {
@@ -134,11 +138,19 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             });
 
             it('when contribution will exceed funding goal', async function () {
+                await increaseTimeTo(this.startTime + duration.seconds(1));
+
+                await this.crowdsale.changePrivateContribution(ether(37997.1), {from: owner});
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
+            });
+
+            it('when contribution will exceed presale goal during presale', async function () {
                 await increaseTimeTo(this.prefundStart + duration.seconds(1));
 
-                await this.crowdsale.changePrivateContribution(ether(37999), {from: owner});
+                await this.crowdsale.changePrivateContribution(ether(2997.1), {from: owner});
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
-                await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.rejected;
             });
         });
     });
@@ -425,7 +437,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
     });
-
 
     describe('gas consumption for looping functions', function () {
 

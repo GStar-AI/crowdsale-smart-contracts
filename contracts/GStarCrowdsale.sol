@@ -38,6 +38,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     //Funding goal is 38,000 ETH, includes private contributions
     uint256 public fundingGoal = 38000 ether;
+    uint256 public presaleGoal = 3000 ether;
     bool public fundingGoalReached = false;
 
     //private contributions
@@ -100,6 +101,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
         if(now >= prefundStart && now < startTime) {
             atLeastMinimumAmount = _weiAmount >= PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI;
+            require(_weiAmount.add(weiRaised.add(privateContribution)) <= presaleGoal);
         }
         super._preValidatePurchase(_beneficiary, _weiAmount);
         require(msg.sender == _beneficiary);
@@ -220,7 +222,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
             //require the address to have sufficient tokens to deliver the tokens
             require(token.balanceOf(address(this)) >= tokensAmount);
-            
+
             if(tokensAmount > 0) {
                 super._deliverTokens(contributors[j], tokensAmount);
 
