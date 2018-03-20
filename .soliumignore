@@ -1,1 +1,6 @@
-node_modules
+node_modules/
+contracts/crowdsale/validation/WhitelistedCrowdsale.sol
+contracts/crowdsale/Crowdsale.sol
+contracts/math/
+contracts/ownership/
+contracts/token/
