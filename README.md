@@ -140,22 +140,6 @@ function stopCrowdsale() external onlyOwner
 
 Allows owner to stop/pause crowdsale.
 
-##### enableTokenRelease
-
-```javascript
-function enableTokenRelease() external onlyOwner
-```
-
-Allows owner to enable token release.
-
-##### disableTokenRelease
-
-```javascript
-function disableTokenRelease() external onlyOwner
-```
-
-Allows owner to disable token release.
-
 ##### releaseTokens
 
 ```javascript
@@ -170,7 +154,7 @@ Release tokens to the addresses in put based on the recorded tokens amount for e
 function close() external onlyOwner
 ```
 
-Allows owner to stop crowdsale and token release, then transfers any remaining tokens in the contract back to the owner. This also prevents any tokens being stuck in the contract.
+Allows owner to stop crowdsale, then transfers any remaining tokens in the contract back to the owner. This also prevents any tokens being stuck in the contract.
 
 ##### addToWhitelist
 
@@ -222,26 +206,14 @@ event StartCrowdsale();
 event StopCrowdsale();
 ```
 
-##### TokenReleaseEnabled
-
-```javascript
-event TokenReleaseEnabled();
-```
-
-##### TokenReleaseDisabled
-
-```javascript
-event TokenReleaseDisabled();
-```
-
-##### ReleaseTokens*
+##### ReleaseTokens
 
 ```javascript
 event ReleaseTokens(address[] _beneficiaries);
 ```
 
 ##### Close
-
+await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
 ```javascript
 event Close();
 ```
