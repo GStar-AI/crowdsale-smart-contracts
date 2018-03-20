@@ -163,7 +163,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.crowdsale.sendTransaction({value: value, from: authorized});
             await this.crowdsale.buyTokens(authorized, { value: value, from: authorized });
 
-            await this.crowdsale.enableTokenRelease({from: owner});
             let currentRate = await this.crowdsale.getRate();
             let tokenValue = value * currentRate * 2;
             let transferValue = tokenValue - ether(0.00000000001);
@@ -177,7 +176,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.crowdsale.sendTransaction({value: value, from: authorized});
             await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized});
 
-            await this.crowdsale.enableTokenRelease({from: owner});
             let currentRate = await this.crowdsale.getRate();
             let tokenValue = value * currentRate * 2;
             let transferValue = tokenValue - ether(0.00000000001);
@@ -192,7 +190,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
 
             await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
-            await this.crowdsale.enableTokenRelease({from: owner});
             await this.crowdsale.releaseTokens([authorized], {from: owner});
             let balance = await this.token.balanceOf(authorized);
             let expectedValue = value * 12000 * 2;
@@ -206,7 +203,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: anotherAuthorized }).should.be.fulfilled;
 
             await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
-            await this.crowdsale.enableTokenRelease({from: owner});
             await this.crowdsale.releaseTokens([anotherAuthorized], {from: owner});
             let balance = await this.token.balanceOf(anotherAuthorized);
             let expectedValue = value * 11500 * 2;
@@ -305,22 +301,23 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.crowdsale.startCrowdsale({from: authorized}).should.be.rejected;
         });
 
-        it('only owner can enable token release', async function () {
-            await this.crowdsale.enableTokenRelease({from: owner}).should.be.fulfilled;
+        it('only owner can release tokens', async function () {
+            await increaseTimeTo(this.prefundStart);
+            await this.crowdsale.sendTransaction({value: value, from: authorized});
+            await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized});
+            await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
 
-            //enabling token release requires it to be disabled first
-            await this.crowdsale.disableTokenRelease({from: owner}).should.be.fulfilled;
-            await this.crowdsale.enableTokenRelease({from: authorized}).should.be.rejected;
+            await this.crowdsale.releaseTokens([authorized, anotherAuthorized], {from: owner}).should.be.fulfilled;
+            await this.crowdsale.releaseTokens([authorized, anotherAuthorized], {from: authorized}).should.be.rejected;
         });
 
-        it('only owner can disable token release', async function () {
-            //disabling token release requires it to be enabled first
-            await this.crowdsale.enableTokenRelease({from: owner}).should.be.fulfilled;
-            await this.crowdsale.disableTokenRelease({from: owner}).should.be.fulfilled;
+        it('only owner can close', async function () {
+            await increaseTimeTo(this.prefundStart);
+            await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
+            await this.crowdsale.close({from: owner}).should.be.fulfilled;
 
-            //disabling token release requires it to be enabled first
-            await this.crowdsale.enableTokenRelease({from: owner}).should.be.fulfilled;
-            await this.crowdsale.disableTokenRelease({from: authorized}).should.be.rejected;
+            await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
+            await this.crowdsale.close({from: authorized}).should.be.rejected;
         });
     });
 
@@ -539,7 +536,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
             await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
-            await this.crowdsale.enableTokenRelease({from: owner});
             return GStarCrowdsale.deployed().then(function(instance) {
                 return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
             }).then(function(result) {
@@ -566,7 +562,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
             await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
-            await this.crowdsale.enableTokenRelease({from: owner});
             return GStarCrowdsale.deployed().then(function(instance) {
                 return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
             }).then(function(result) {
@@ -593,7 +588,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 await this.crowdsale.sendTransaction({value: value, from: accountArray[i]});
             }
             await this.token.transfer(this.crowdsale.address, tokenSupply, {from: owner});
-            await this.crowdsale.enableTokenRelease({from: owner});
             return GStarCrowdsale.deployed().then(function(instance) {
                 return instance.releaseTokens(accountArray, {from: owner}).should.be.fulfilled;
             }).then(function(result) {
@@ -604,4 +598,5 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             });
         });
     });
+
 });

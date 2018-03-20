@@ -47,9 +47,6 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     // Indicates if crowdsale is active
     bool public crowdsaleActive = false;
 
-    // Indicates if tokens can be released
-    bool public canTokenRelease = false;
-
     uint256 public tokensReleasedAmount = 0;
 
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
@@ -192,24 +189,6 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     }
 
     /**
-    * @dev Allows owner to enable release of tokens.
-    */
-    function enableTokenRelease() external onlyOwner {
-        require(!canTokenRelease);
-        canTokenRelease = true;
-        TokenReleaseEnabled();
-    }
-
-    /**
-    * @dev Allows owner to disable token release.
-    */
-    function disableTokenRelease() external onlyOwner {
-        require(canTokenRelease);
-        canTokenRelease = false;
-        TokenReleaseDisabled();
-    }
-
-    /**
     * @dev Release tokens to multiple addresses.
     * @param contributors Addresses to release tokens to
     */
@@ -239,7 +218,6 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function close() external onlyOwner {
         crowdsaleActive = false;
-        canTokenRelease = false;
         token.transfer(owner, token.balanceOf(address(this)));
         Close();
     }
