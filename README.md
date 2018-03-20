@@ -256,14 +256,8 @@ $ npm install -g truffle
 // Install ganache-cli which includes testrpc
 $ npm install -g ganache-cli
 
-// Install OpenZeppelin framework
-$ npm install -E zeppelin-solidity
-
 // Install node dependencies
 $ npm install
-
-// Install modules listed in .babelrc
-$ npm i -g babelrc-install
 
 // Install web3
 $ npm install ethereum/web3.js
