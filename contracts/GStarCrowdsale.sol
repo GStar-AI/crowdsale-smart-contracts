@@ -96,10 +96,10 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * The minimum purchase amount for Pre-ICO is different from ICO.
     */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal isWhitelisted(_beneficiary) {
-        bool withinPeriod = now >= prefundStart && now <= endTime;
+        bool withinPeriod = block.timestamp >= prefundStart && block.timestamp <= endTime;
         bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
 
-        if(now >= prefundStart && now < startTime) {
+        if(block.timestamp >= prefundStart && block.timestamp < startTime) {
             atLeastMinimumAmount = _weiAmount >= PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI;
             require(_weiAmount.add(weiRaised.add(privateContribution)) <= presaleGoal);
         }
@@ -127,13 +127,13 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function getRate() public view returns (uint256) {
         //calculate bonus based on timing
-        if(now <= startTime) {return 12000;} //pre-fund period
-        if(now <= startTime.add(1 days)) {return 11500;}
-        if(now <= startTime.add(3 days)) {return 11200;}
-        if(now <= startTime.add(7 days)) {return 10800;}
-        if(now <= startTime.add(2 weeks)) {return 10400;}
-        if(now <= startTime.add(3 weeks)) {return 10200;}
-        if(now <= startTime.add(4 weeks)) {return rate;}
+        if(block.timestamp <= startTime) {return 12000;} //pre-fund period
+        if(block.timestamp <= startTime.add(1 days)) {return 11500;}
+        if(block.timestamp <= startTime.add(3 days)) {return 11200;}
+        if(block.timestamp <= startTime.add(7 days)) {return 10800;}
+        if(block.timestamp <= startTime.add(2 weeks)) {return 10400;}
+        if(block.timestamp <= startTime.add(3 weeks)) {return 10200;}
+        if(block.timestamp <= startTime.add(4 weeks)) {return rate;}
 
         return rate;
     }
@@ -152,7 +152,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Updates beneficiary's contribution.
     */
     function _postValidatePurchase(address _beneficiary, uint256 _weiAmount) internal {
-      depositedTokens[_beneficiary] = depositedTokens[_beneficiary].add(_getTokenAmount(_weiAmount));
+        depositedTokens[_beneficiary] = depositedTokens[_beneficiary].add(_getTokenAmount(_weiAmount));
     }
 
     /**
@@ -170,7 +170,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Private contribution amount will be calculated into funding goal.
     */
     function changePrivateContribution(uint256 etherWeiAmount) external onlyOwner {
-      privateContribution = etherWeiAmount;
+        privateContribution = etherWeiAmount;
     }
 
     /**
@@ -244,4 +244,4 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         Close();
     }
 
- }
+}

@@ -1,8 +1,8 @@
 pragma solidity ^0.4.19;
 
-import './math/SafeMath.sol';
-import './ownership/Ownable.sol';
-import './token/ERC20/StandardToken.sol';
+import "./math/SafeMath.sol";
+import "./ownership/Ownable.sol";
+import "./token/ERC20/StandardToken.sol";
 
 contract GStarToken is StandardToken, Ownable {
     using SafeMath for uint256;
