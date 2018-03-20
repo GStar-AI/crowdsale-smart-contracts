@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.18;
 
 import "./math/SafeMath.sol";
 import "./ownership/Ownable.sol";
@@ -99,7 +99,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         bool withinPeriod = block.timestamp >= prefundStart && block.timestamp <= endTime;
         bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
 
-        if(block.timestamp >= prefundStart && block.timestamp < startTime) {
+        if (block.timestamp >= prefundStart && block.timestamp < startTime) {
             atLeastMinimumAmount = _weiAmount >= PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI;
             require(_weiAmount.add(weiRaised.add(privateContribution)) <= presaleGoal);
         }
@@ -127,13 +127,13 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function getRate() public view returns (uint256) {
         //calculate bonus based on timing
-        if(block.timestamp <= startTime) {return 12000;} //pre-fund period
-        if(block.timestamp <= startTime.add(1 days)) {return 11500;}
-        if(block.timestamp <= startTime.add(3 days)) {return 11200;}
-        if(block.timestamp <= startTime.add(7 days)) {return 10800;}
-        if(block.timestamp <= startTime.add(2 weeks)) {return 10400;}
-        if(block.timestamp <= startTime.add(3 weeks)) {return 10200;}
-        if(block.timestamp <= startTime.add(4 weeks)) {return rate;}
+        if (block.timestamp <= startTime) {return 12000;} //pre-fund period
+        if (block.timestamp <= startTime.add(1 days)) {return 11500;}
+        if (block.timestamp <= startTime.add(3 days)) {return 11200;}
+        if (block.timestamp <= startTime.add(7 days)) {return 10800;}
+        if (block.timestamp <= startTime.add(2 weeks)) {return 10400;}
+        if (block.timestamp <= startTime.add(3 weeks)) {return 10200;}
+        if (block.timestamp <= startTime.add(4 weeks)) {return rate;}
 
         return rate;
     }
@@ -159,7 +159,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @dev Updates fundingGoal status.
     */
     function updateFundingGoal() internal {
-        if(weiRaised >= fundingGoal){
+        if (weiRaised >= fundingGoal) {
             fundingGoalReached = true;
             GoalReached(weiRaised);
         }
@@ -223,7 +223,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
             //require the address to have sufficient tokens to deliver the tokens
             require(token.balanceOf(address(this)) >= tokensAmount);
 
-            if(tokensAmount > 0) {
+            if (tokensAmount > 0) {
                 super._deliverTokens(contributors[j], tokensAmount);
 
                 depositedTokens[contributors[j]] = 0;

@@ -1,4 +1,4 @@
-pragma solidity ^0.4.19;
+pragma solidity ^0.4.18;
 
 import "./math/SafeMath.sol";
 import "./ownership/Ownable.sol";
@@ -14,7 +14,6 @@ contract GStarToken is StandardToken, Ownable {
     uint256 public constant INITIAL_SUPPLY = 1600000000 * ((10 ** uint256(decimals)));
     uint256 public current_total_supply = 0;
 
-    event RaiseCap(address owner, uint256 SUPPLY_CAP);
     event Burn(address indexed burner, uint256 value);
 
 
