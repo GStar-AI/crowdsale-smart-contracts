@@ -21,7 +21,7 @@ The contracts are located in the [contracts](contracts) directory.
 * GSTAR token is ERC-20 compliant.
 * GSTAR token is hardcapped at 1.6 billion tokens.
 * GSTAR token is non-mintable.
-* Any excess token will be burned off by the owner at the end of the crowdsale.
+* Any excess token will be burned off by the owner at the end of the crowdsale
 * GSTAR tokens will be released only after the crowdsale ends.
 * Contributors are required to be whitelisted.
 * Funding goal is capped at 38,000 ETH.
