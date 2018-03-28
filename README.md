@@ -45,7 +45,7 @@ The contracts are located in the [contracts](contracts) directory.
 
 ## Development Framework
 
-* The contracts are written in [Solidity][solidity] and tested using [Truffle][truffle] version [4.1.0][truffle_v4.1.0] and [Ganache CLI][ganache].
+* The contracts are written in [Solidity][solidity] and tested using [Truffle][truffle] version [4.1.3][truffle_v4.1.3] and [Ganache CLI][ganache].
 * The smart contracts are based on [OpenZeppelin][openzeppelin] framework version [1.7.0][openzeppelin_v1.7.0].
 
 ## Smart Contracts Code
@@ -239,7 +239,7 @@ $ npm install ethereum/web3.js
 [gstar.ai]: https://gstar.ai/
 [solidity]: https://solidity.readthedocs.io/en/develop/#
 [truffle]: http://truffleframework.com/
-[truffle_v4.1.0]: https://github.com/trufflesuite/truffle/releases/tag/v4.1.0
+[truffle_v4.1.3]: https://github.com/trufflesuite/truffle/releases/tag/v4.1.3
 [ganache]: https://github.com/trufflesuite/ganache-cli
 [openzeppelin]: https://openzeppelin.org/
 [openzeppelin_v1.7.0]: https://github.com/OpenZeppelin/zeppelin-solidity/releases/tag/v1.7.0
