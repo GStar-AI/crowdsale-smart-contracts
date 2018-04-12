@@ -36,8 +36,8 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     // Total tokens raised so far, bonus inclusive
     uint256 public tokensWeiRaised = 0;
 
-    //Funding goal is 38,000 ETH, includes private contributions
-    uint256 public fundingGoal = 38000 ether;
+    //Funding goal is 76,000 ETH, includes private contributions
+    uint256 public fundingGoal = 76000 ether;
     uint256 public presaleGoal = 3000 ether;
     bool public fundingGoalReached = false;
 
