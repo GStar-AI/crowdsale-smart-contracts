@@ -31,17 +31,13 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
     before(async function() {
         await advanceBlock();
+        await increaseTimeTo(1531051200); // 8 Jul 2018 1200h, the same start time as hardcoded in contract
     });
 
     beforeEach(async function () {
 
-        //assuming prefund last 2 weeks, the actual ICO last 4 weeks
-        this.currentTime = latestTime() + duration.seconds(1);
-        this.startTime = this.currentTime + duration.days(1);
-
         this.token = await GStarToken.new({from: owner});
         this.crowdsale = await GStarCrowdsale.new(
-            this.startTime,
             rate,
             wallet,
             this.token.address,
@@ -50,80 +46,48 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
         await this.crowdsale.addToWhitelist(authorized, {from: owner});
         await this.crowdsale.addToWhitelist(anotherAuthorized, {from: owner});
-        await this.crowdsale.startCrowdsale({from: owner});
-        await increaseTimeTo(this.currentTime);
+        await this.crowdsale.startCrowdsale({from: owner});   
   });
 
     describe('prevalidation of token contribution', function () {
         describe('should accept payments', function () {
 
             it('from whitelisted contributors during funding period', async function () {
-                await increaseTimeTo(this.startTime);
-
                 await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.fulfilled;
             });
 
             it('when contribution will equate weiRaised to funding goal', async function () {
-                await increaseTimeTo(this.startTime);
-
                 await this.crowdsale.changePrivateContribution(ether(37997), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
             });
-
-            it('when contribution will equate weiRaised to funding goal', async function () {
-                await increaseTimeTo(this.startTime);
-
-                await this.crowdsale.changePrivateContribution(ether(2997), {from: owner});
-                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
-                await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
-            });
-
         });
 
         describe('should not accept payments', function () {
             it('when crowdsale is inactive', async function () {
-                await increaseTimeTo(this.prefundStart + duration.seconds(1));
-
                 await this.crowdsale.stopCrowdsale({from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
                 await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.rejected;
             });
 
             it('when contributor is not whitelisted', async function () {
-                await increaseTimeTo(this.prefundStart + duration.seconds(1));
                 await this.crowdsale.sendTransaction({value: value, from: unauthorized}).should.be.rejected;
                 await this.crowdsale.buyTokens(unauthorized, { value: value, from: unauthorized }).should.be.rejected;
             });
 
-            it('when contribution is below minimum amount during pre-fund period', async function () {
-                await increaseTimeTo(this.prefundStart + duration.seconds(1));
-                await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.rejected;
-                await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.rejected;
-            });
 
             it('when contribution is below minimum amount during funding period', async function () {
-                await increaseTimeTo(this.startTime + duration.seconds(1));
                 await this.crowdsale.sendTransaction({value: belowMinimumValue, from: authorized}).should.be.rejected;
                 await this.crowdsale.buyTokens(authorized, { value: belowMinimumValue, from: authorized }).should.be.rejected;
             });
 
             it('when contributor is different from beneficiary', async function () {
-                await increaseTimeTo(this.startTime + duration.seconds(1));
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(anotherAuthorized, { value: belowMinimumValue, from: authorized }).should.be.rejected;
             });
 
-
-            it('when contribution is after end time', async function () {
-                await increaseTimeTo(this.endTime + duration.seconds(1));
-                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
-                await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.rejected;
-            });
-
             it('when contribution will exceed funding goal', async function () {
-                await increaseTimeTo(this.startTime + duration.seconds(1));
 
                 await this.crowdsale.changePrivateContribution(ether(75997.1), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
@@ -135,7 +99,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     describe('high level contribution process', function() {
 
         it('tokens should not deliver when there is lack of tokens (single contributor)', async function () {
-            await increaseTimeTo(this.startTime);
 
             await this.crowdsale.sendTransaction({value: value, from: authorized});
             await this.crowdsale.buyTokens(authorized, { value: value, from: authorized });
@@ -148,7 +111,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('tokens should not deliver when there is lack of tokens (multiple contributors)', async function () {
-            await increaseTimeTo(this.startTime);
 
             await this.crowdsale.sendTransaction({value: value, from: authorized});
             await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized});
@@ -161,7 +123,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('funding contribution, tokens delivered', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
 
             await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized}).should.be.fulfilled;
             await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: anotherAuthorized }).should.be.fulfilled;
@@ -177,13 +138,12 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     describe('bonus structure', function () {
 
          it('during day 1 is 10800', async function () {
-             await increaseTimeTo(this.startTime + duration.seconds(1));
              let rate = await this.crowdsale.getRate();
              assert.equal(rate, 10800);
          });
 
          it('day 2 onwards is 10000', async function () {
-             await increaseTimeTo(this.startTime + duration.days(1) + duration.seconds(1));
+             await increaseTimeTo(latestTime() + duration.days(1) + duration.seconds(1));
              let rate = await this.crowdsale.getRate();
              assert.equal(rate, 10000);
          });
@@ -263,7 +223,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 try{
                     this.token = await GStarToken.new({from: owner});
                     this.crowdsale = await GStarCrowdsale.new(
-                        this.startTime,
                         rate,
                         0x0,
                         this.token.address,
@@ -275,29 +234,10 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 assert(false, "did not throw with invalid wallet address");
             });
 
-            it('when start time is after end time', async function () {
-                let endTime = 1533729600;
-                let lateStartTime = endTime + duration.seconds(1);
-                try{
-                    this.token = await GStarToken.new({from: owner});
-                    this.crowdsale = await GStarCrowdsale.new(
-                        lateStartTime,
-                        rate,
-                        wallet,
-                        this.token.address,
-                        {from: owner}
-                    );
-                } catch(error) {
-                    return utils.ensureException(error);
-                }
-                assert(false, "did not throw when end time is before start time");
-            });
-
             it('when token address is 0x0', async function () {
                 try{
                     this.token = await GStarToken.new({from: owner});
                     this.crowdsale = await GStarCrowdsale.new(
-                        this.startTime,
                         rate,
                         wallet,
                         0x0,
@@ -313,7 +253,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 try{
                     this.token = await GStarToken.new({from: owner});
                     this.crowdsale = await GStarCrowdsale.new(
-                        this.startTime,
                         0,
                         wallet,
                         this.token.address,
@@ -330,7 +269,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
     describe('gas consumption for looping functions', function () {
 
         it('add a single address to whitelist with address input', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
 
             return GStarCrowdsale.deployed().then(function(instance) {
                 return instance.addToWhitelist(web3.eth.accounts[2], {from: owner}).should.be.fulfilled;
@@ -343,7 +281,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('add a single address to whitelist with array input', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 1; //1 accounts
 
@@ -362,7 +299,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('add 100 addresses to whitelist', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 100; //100 accounts
 
@@ -381,7 +317,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('add 200 addresses to whitelist', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 200; //100 accounts
 
@@ -400,8 +335,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('single transfer of tokens', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
-
             return GStarToken.deployed().then(function(instance) {
                 return instance.transfer(web3.eth.accounts[2], (value * rate), {from: owner}).should.be.fulfilled;
             }).then(function(result) {
@@ -413,7 +346,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('release tokens for a single address', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 1; //1 account
 
@@ -439,7 +371,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('release tokens to 100 addresses', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 100; //100 accounts
 
@@ -465,7 +396,6 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
 
         it('release tokens to 200 addresses', async function () {
-            await increaseTimeTo(this.startTime + duration.seconds(1));
             let accountArray = [];
             const length = 200; //200 accounts
 
@@ -491,4 +421,11 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
     });
 
+    describe('after end time', function () {
+        it('should not accept payment', async function () {
+            await increaseTimeTo(latestTime() + duration.weeks(5));
+            await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
+            await this.crowdsale.buyTokens(authorized,  {value: value, from: authorized}).should.be.rejected;
+        });
+    });
 });
