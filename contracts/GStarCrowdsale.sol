@@ -20,7 +20,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
-    uint256 public startTime;
+    uint256 public startTime = 1531051200; // 8 Jul 2018 1200h
     uint256 public endTime = 1533729600; // 8 Aug 2018 1200h
 
     // Keeps track of contributors tokens
@@ -56,16 +56,10 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @dev Constructor. Checks validity of the time entered.
     */
     function GStarCrowdsale(
-        uint256 _startTime,
         uint256 _rate,
         address _wallet,
         GStarToken token
         ) public Crowdsale(_rate, _wallet, token) {
-
-        require(_startTime != 0);        
-        require(_startTime < endTime);
-
-        startTime = _startTime;
     }
 
     /**
