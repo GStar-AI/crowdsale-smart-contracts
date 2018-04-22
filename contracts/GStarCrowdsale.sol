@@ -10,7 +10,7 @@ import "./GStarToken.sol";
 /**
  * @title GStarCrowdsale
  * @dev This contract manages the crowdsale of GStar Tokens.
- * The crowdsale will involve three key timings - Start of Pre-fund, start time, end time,
+ * The crowdsale will involve two key timings - Start and ending of funding.
  * The earlier the contribution, the larger the bonuses. (according to the bonus structure)
  * Tokens will be released to the contributors after the crowdsale.
  * There is only one owner at any one time. The owner can stop or start the crowdsale at anytime.
@@ -20,25 +20,21 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
-    uint256 public prefundStart;
     uint256 public startTime;
-    uint256 public endTime;
+    uint256 public endTime = 1533729600; // 8 Aug 2018 1200h
 
     // Keeps track of contributors tokens
     mapping (address => uint256) public depositedTokens;
 
-    // Minimum amount of ETH contribution during ICO and Pre-ICO period
+    // Minimum amount of ETH contribution during ICO period
     // Minimum of ETH contributed during ICO is 0.1ETH
-    // Minimum of ETH contributed during pre-ICO is 1ETH
     uint256 public MINIMUM_PURCHASE_AMOUNT_IN_WEI = 10**17;
-    uint256 public PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI = 1 ether;
 
     // Total tokens raised so far, bonus inclusive
     uint256 public tokensWeiRaised = 0;
 
     //Funding goal is 76,000 ETH, includes private contributions
     uint256 public fundingGoal = 76000 ether;
-    uint256 public presaleGoal = 3000 ether;
     bool public fundingGoalReached = false;
 
     //private contributions
@@ -60,24 +56,16 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @dev Constructor. Checks validity of the time entered.
     */
     function GStarCrowdsale(
-        uint256 _prefundStart,
         uint256 _startTime,
-        uint256 _endTime,
         uint256 _rate,
         address _wallet,
         GStarToken token
         ) public Crowdsale(_rate, _wallet, token) {
 
-        require(_prefundStart != 0);
-        require(_startTime != 0);
-        require(_endTime != 0);
-        //crowdsale is at least a month long, excluding pre-fund period
-        require(_startTime.add(4 weeks) <= _endTime);
-        require(_prefundStart < _startTime);
+        require(_startTime != 0);        
+        require(_startTime < endTime);
 
-        prefundStart = _prefundStart;
         startTime = _startTime;
-        endTime = _endTime;
     }
 
     /**
@@ -88,16 +76,11 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Requires amount not to exceed funding goal.
     * Requires purchase value to be higher or equal to minimum amount.
     * Requires contributor to be whitelisted.
-    * The minimum purchase amount for Pre-ICO is different from ICO.
     */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal isWhitelisted(_beneficiary) {
-        bool withinPeriod = block.timestamp >= prefundStart && block.timestamp <= endTime;
+        bool withinPeriod = now >= startTime && now <= endTime;
         bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
 
-        if (block.timestamp >= prefundStart && block.timestamp < startTime) {
-            atLeastMinimumAmount = _weiAmount >= PRE_ICO_MINIMUM_PURCHASE_AMOUNT_IN_WEI;
-            require(_weiAmount.add(weiRaised.add(privateContribution)) <= presaleGoal);
-        }
         super._preValidatePurchase(_beneficiary, _weiAmount);
         require(msg.sender == _beneficiary);
         require(_weiAmount.add(weiRaised.add(privateContribution)) <= fundingGoal);
@@ -122,13 +105,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function getRate() public view returns (uint256) {
         //calculate bonus based on timing
-        if (block.timestamp <= startTime) {return 12000;} //pre-fund period
-        if (block.timestamp <= startTime.add(1 days)) {return 11500;}
-        if (block.timestamp <= startTime.add(3 days)) {return 11200;}
-        if (block.timestamp <= startTime.add(7 days)) {return 10800;}
-        if (block.timestamp <= startTime.add(2 weeks)) {return 10400;}
-        if (block.timestamp <= startTime.add(3 weeks)) {return 10200;}
-        if (block.timestamp <= startTime.add(4 weeks)) {return rate;}
+        if (block.timestamp <= startTime.add(1 days)) {return 10800;}
 
         return rate;
     }
