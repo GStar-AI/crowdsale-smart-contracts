@@ -25,7 +25,6 @@ The contracts are located in the [contracts](contracts) directory.
 * GSTAR tokens will be released only after the crowdsale ends.
 * Contributors are required to be whitelisted.
 * Funding goal is capped at 76,000 ETH.
-* Presale goal is capped at 3,000 ETH and will only be effective during presale period.
 
 ### Token Distribution
 
@@ -33,15 +32,10 @@ The contracts are located in the [contracts](contracts) directory.
 
 ## GSTAR Bonus Structure
 
-| Period             | Bonus Tokens |
-| :----------------: | :----------: |
-| Pre-ICO            | 20%          |
-| ICO Day 1          | 15%          |
-| ICO Day 2 to Day 3 | 12%          |
-| ICO Day 4 to Day 7 | 8%           |
-| ICO Week 2         | 4%           |
-| ICO Week 3         | 2%           |
-| ICO Week 4         | No Bonus     |
+| Period        | Bonus Tokens |
+| :-----------: | :----------: |
+| Day 1         | 8%           |
+| Day 2 onwards | No Bonus     |
 
 ## Development Framework
 
@@ -80,7 +74,6 @@ Overrode the function from Crowdsale.sol from OpenZeppelin. Check if the contrib
 * Crowdsale is active.
 * Contributor and beneficiary are the same address.
 * Contribution does not exceed funding goal.
-* Contribution does not exceed presale goal amount during presale period.
 * Contribution is at least of minimum amount.
 * Contributor is whitelisted.
 
