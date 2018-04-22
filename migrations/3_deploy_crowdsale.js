@@ -19,7 +19,7 @@ module.exports = function(deployer) {
     const startTime = currentTime + WEEK * 2;
 
 
-    //deployer.deploy(GStarCrowdsale, currentTime, rate, wallet, GStarToken.address, {from: owner});
-    deployer.deploy(GStarCrowdsale, currentTime, rate, wallet, GStarToken.address);
+    //deployer.deploy(GStarCrowdsale, rate, wallet, GStarToken.address, {from: owner});
+    deployer.deploy(GStarCrowdsale, rate, wallet, GStarToken.address);
 
 };
