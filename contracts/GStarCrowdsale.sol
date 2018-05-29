@@ -94,7 +94,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Requires purchase value to be higher or equal to minimum amount.
     * Requires contributor to be whitelisted.
     */
-    function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal isWhitelisted(_beneficiary) {
+    function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal {
         bool withinPeriod = now >= startTime && now <= endTime;
         bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
 
