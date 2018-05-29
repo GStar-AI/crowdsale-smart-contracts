@@ -192,9 +192,6 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
             // the amount of tokens to be distributed to contributor
             uint256 tokensAmount = depositedTokens[contributors[j]];
 
-            //require the address to have sufficient tokens to deliver the tokens
-            require(token.balanceOf(address(this)) >= tokensAmount);
-
             if (tokensAmount > 0) {
                 super._deliverTokens(contributors[j], tokensAmount);
 
