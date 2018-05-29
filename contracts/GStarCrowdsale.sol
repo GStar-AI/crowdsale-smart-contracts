@@ -20,15 +20,15 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
-    uint256 public startTime = 1531051200; // 8 Jul 2018 1200h
-    uint256 public endTime = 1533729600; // 8 Aug 2018 1200h
+    uint256 constant public startTime = 1531051200; // 8 Jul 2018 1200h
+    uint256 constant public endTime = 1533729600; // 8 Aug 2018 1200h
 
     // Keeps track of contributors tokens
     mapping (address => uint256) public depositedTokens;
 
     // Minimum amount of ETH contribution during ICO period
     // Minimum of ETH contributed during ICO is 0.1ETH
-    uint256 public MINIMUM_PURCHASE_AMOUNT_IN_WEI = 10**17;
+    uint256 constant public MINIMUM_PURCHASE_AMOUNT_IN_WEI = 0.1 ether;
 
     // Total tokens raised so far, bonus inclusive
     uint256 public tokensWeiRaised = 0;
