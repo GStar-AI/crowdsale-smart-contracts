@@ -63,6 +63,29 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     }
 
     /**
+    * @dev Override buyTokens function as tokens should only be delivered when released.
+    * @param _beneficiary Address receiving the tokens.
+    */
+    function buyTokens(address _beneficiary) public payable {
+
+        uint256 weiAmount = msg.value;
+        _preValidatePurchase(_beneficiary, weiAmount);
+
+        // calculate token amount to be created
+        uint256 tokens = _getTokenAmount(weiAmount);
+
+        // update state
+        weiRaised = weiRaised.add(weiAmount);
+
+        emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
+
+        _updatePurchasingState(_beneficiary, weiAmount);
+
+        _forwardFunds();
+        _postValidatePurchase(_beneficiary, weiAmount);
+    }
+
+    /**
     * @dev Overrides _preValidatePurchase function in Crowdsale.
     * Requires purchase is made within crowdsale period.
     * Requires contributor to be the beneficiary.
