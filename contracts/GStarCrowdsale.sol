@@ -77,12 +77,12 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         // update state
         weiRaised = weiRaised.add(weiAmount);
 
+        _processPurchase(_beneficiary, weiAmount);
         emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
 
         _updatePurchasingState(_beneficiary, weiAmount);
 
         _forwardFunds();
-        _postValidatePurchase(_beneficiary, weiAmount);
     }
 
     /**
@@ -137,11 +137,12 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     }
 
     /**
-    * @dev Overrides _postValidatePurchase function from Crowdsale.
-    * Updates beneficiary's contribution.
+    * @dev Overrides _processPurchase function from Crowdsale.
+    * Adds the tokens purchased to the beneficiary.
+    * @param _tokenAmount The token amount in wei before multiplied by the rate.
     */
-    function _postValidatePurchase(address _beneficiary, uint256 _weiAmount) internal {
-        depositedTokens[_beneficiary] = depositedTokens[_beneficiary].add(_getTokenAmount(_weiAmount));
+    function _processPurchase(address _beneficiary, uint256 _tokenAmount) internal {
+        depositedTokens[_beneficiary] = depositedTokens[_beneficiary].add(_getTokenAmount(_tokenAmount));
     }
 
     /**
