@@ -12,7 +12,7 @@ contract GStarToken is StandardToken, Ownable {
     uint8 public constant decimals = 18;
 
     uint256 public constant INITIAL_SUPPLY = 1600000000 * ((10 ** uint256(decimals)));
-    uint256 public current_total_supply = 0;
+    uint256 public currentTotalSupply = 0;
 
     event Burn(address indexed burner, uint256 value);
 
@@ -24,7 +24,7 @@ contract GStarToken is StandardToken, Ownable {
         owner = msg.sender;
         totalSupply_ = INITIAL_SUPPLY;
         balances[owner] = INITIAL_SUPPLY;
-        current_total_supply = INITIAL_SUPPLY;
+        currentTotalSupply = INITIAL_SUPPLY;
         Transfer(address(0), owner, INITIAL_SUPPLY);
     }
 
@@ -37,7 +37,7 @@ contract GStarToken is StandardToken, Ownable {
 
         address burner = msg.sender;
         balances[burner] = balances[burner].sub(_value);
-        current_total_supply = current_total_supply.sub(_value);
+        currentTotalSupply = currentTotalSupply.sub(_value);
         Burn(burner, _value);
     }
 }
