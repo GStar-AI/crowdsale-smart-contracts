@@ -101,10 +101,10 @@ function _updatePurchasingState(address _beneficiary, uint256 _weiAmount) intern
 
 Updates the token amount attributed to the contributor based on the ETH contributed, then updates funding goal.
 
-##### updateFundingGoal
+##### _updateFundingGoal
 
 ```javascript
-function updateFundingGoal() internal
+function _updateFundingGoal() internal
 ```
 
 Updates if the funding goal is reached. If the funding goal is reached, no more purchase of tokens is allowed.

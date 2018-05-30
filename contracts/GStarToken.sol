@@ -30,14 +30,14 @@ contract GStarToken is StandardToken, Ownable {
 
     /**
     * @dev Burns a specific amount of tokens.
-    * @param _value The amount of token to be burned.
+    * @param value The amount of token to be burned.
     */
-    function burn(uint256 _value) public onlyOwner {
-        require(_value <= balances[msg.sender]);
+    function burn(uint256 value) public onlyOwner {
+        require(value <= balances[msg.sender]);
 
         address burner = msg.sender;
-        balances[burner] = balances[burner] - _value;
-        currentTotalSupply = currentTotalSupply - _value;
-        Burn(burner, _value);
+        balances[burner] = balances[burner] - value;
+        currentTotalSupply = currentTotalSupply - value;
+        emit Burn(burner, value);
     }
 }
