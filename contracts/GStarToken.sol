@@ -36,8 +36,8 @@ contract GStarToken is StandardToken, Ownable {
         require(value <= balances[msg.sender]);
 
         address burner = msg.sender;
-        balances[burner] = balances[burner] - value;
-        currentTotalSupply = currentTotalSupply - value;
+        balances[burner] = balances[burner].sub(value);
+        currentTotalSupply = currentTotalSupply.sub(value);
         emit Burn(burner, value);
     }
 }
