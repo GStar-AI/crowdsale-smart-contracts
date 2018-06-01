@@ -101,7 +101,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function getRate() public view returns (uint256) {
         //calculate bonus based on timing
-        if (block.timestamp <= startTime.add(1 days)) {return ((rate / 100) * 108);} // 8 percent bonus on day one, rate = 10800
+        if (block.timestamp <= startTime.add(1 days)) {return ((rate / 100) * 108);} // 8 percent bonus on day one, return 10800
 
         return rate;
     }
