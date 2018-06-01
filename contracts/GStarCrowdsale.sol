@@ -86,13 +86,13 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
         // update state
         weiRaised = weiRaised.add(weiAmount);
-
-        _processPurchase(_beneficiary, weiAmount);
+        
         emit TokenPurchase(msg.sender, _beneficiary, weiAmount, tokens);
 
         _updatePurchasingState(_beneficiary, weiAmount);
 
         _forwardFunds();
+        _processPurchase(_beneficiary, weiAmount);
     }
 
     /**
