@@ -42,6 +42,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Indicates if crowdsale is active
     bool public crowdsaleActive = false;
+    bool public isCrowdsaleClosed = false;
 
     uint256 public tokensReleasedAmount = 0;
 
@@ -124,6 +125,8 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function startCrowdsale() external onlyOwner {
         require(!crowdsaleActive);
+        require(!isCrowdsaleClosed);
+
         crowdsaleActive = true;
         emit StartCrowdsale();
     }
@@ -164,6 +167,8 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function close() external onlyOwner {
         crowdsaleActive = false;
+        isCrowdsaleClosed = true;
+        
         token.transfer(owner, token.balanceOf(address(this)));
         emit Close();
     }

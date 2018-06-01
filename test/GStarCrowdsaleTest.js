@@ -133,6 +133,12 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             let expectedValue = value * 10800 * 2;
             balance.should.be.bignumber.equal(expectedValue);
         });
+
+        it('crowdsale cannot be started after closed', async function () {
+
+            await this.crowdsale.close({from: owner});
+            await this.crowdsale.startCrowdsale({from: owner}).should.be.rejected;
+        });
     });
 
     describe('bonus structure', function () {
