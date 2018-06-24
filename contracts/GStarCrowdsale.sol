@@ -20,14 +20,16 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     // Start and end timestamps where contributions are allowed (both inclusive)
     // All timestamps are expressed in seconds instead of block number.
-    uint256 constant public startTime = 1531051200; // 8 Jul 2018 1200h
-    uint256 constant public endTime = 1533729600; // 8 Aug 2018 1200h
+    uint256 constant public presaleStartTime = 1531051200; // 8 Jul 2018 1200h
+    uint256 constant public startTime = 1532260800; // 22 Jul 2018 1200h
+    uint256 constant public endTime = 1534593600; // 18 Aug 2018 1200h
 
     // Keeps track of contributors tokens
     mapping (address => uint256) public depositedTokens;
 
     // Minimum amount of ETH contribution during ICO period
     // Minimum of ETH contributed during ICO is 0.1ETH
+    uint256 constant public MINIMUM_PRESALE_PURCHASE_AMOUNT_IN_WEI = 1 ether;
     uint256 constant public MINIMUM_PURCHASE_AMOUNT_IN_WEI = 0.1 ether;
 
     // Total tokens raised so far, bonus inclusive
@@ -102,6 +104,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     */
     function getRate() public view returns (uint256) {
         //calculate bonus based on timing
+        if (block.timestamp <= startTime) { return ((rate / 100) * 120); } // 20 percent bonus on presale period, returns 12000
         if (block.timestamp <= startTime.add(1 days)) {return ((rate / 100) * 108);} // 8 percent bonus on day one, return 10800
 
         return rate;
@@ -188,8 +191,17 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * Requires contributor to be whitelisted.
     */
     function _preValidatePurchase(address _beneficiary, uint256 _weiAmount) internal {
-        bool withinPeriod = now >= startTime && now <= endTime;
-        bool atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
+        bool withinPeriod = now >= presaleStartTime && now <= endTime;
+
+        bool atLeastMinimumAmount = false;
+
+        if(block.timestamp <= startTime) {
+
+            atLeastMinimumAmount = _weiAmount >= MINIMUM_PRESALE_PURCHASE_AMOUNT_IN_WEI;
+            
+        } else {
+            atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
+        }
 
         super._preValidatePurchase(_beneficiary, _weiAmount);
         require(msg.sender == _beneficiary);
