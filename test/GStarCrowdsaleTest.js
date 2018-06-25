@@ -31,7 +31,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
     before(async function() {
         await advanceBlock();
-        await increaseTimeTo(1531051200); // 8 Jul 2018 1200h, the same start time as hardcoded in contract
+        await increaseTimeTo(1531051200); // 8 Jul 2018 1200h, the start of presale as hardcoded in contract
     });
 
     beforeEach(async function () {
@@ -47,18 +47,26 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         await this.crowdsale.addToWhitelist(authorized, {from: owner});
         await this.crowdsale.addToWhitelist(anotherAuthorized, {from: owner});
         await this.crowdsale.startCrowdsale({from: owner});   
-  });
+    });
 
-    describe('prevalidation of token contribution', function () {
+    describe('prevalidation of token contribution during presale period', function () {
+        
+        describe('rate is 12000', function () {
+            it('during presale period is 12000', async function () {
+                let rate = await this.crowdsale.getRate();
+                assert.equal(rate, 12000);
+            });
+        });
+        
         describe('should accept payments', function () {
 
-            it('from whitelisted contributors during funding period', async function () {
-                await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.fulfilled;
-                await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.fulfilled;
+            it('from whitelisted contributors', async function () {
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
             });
 
             it('when contribution will equate weiRaised to funding goal', async function () {
-                await this.crowdsale.changePrivateContribution(ether(37997), {from: owner});
+                await this.crowdsale.changePrivateContribution(ether(75997), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
             });
@@ -76,10 +84,9 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
                 await this.crowdsale.buyTokens(unauthorized, { value: value, from: unauthorized }).should.be.rejected;
             });
 
-
-            it('when contribution is below minimum amount during funding period', async function () {
-                await this.crowdsale.sendTransaction({value: belowMinimumValue, from: authorized}).should.be.rejected;
-                await this.crowdsale.buyTokens(authorized, { value: belowMinimumValue, from: authorized }).should.be.rejected;
+            it('when contribution is below minimum amount during presale period', async function () {
+                await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.rejected;
+                await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.rejected;
             });
 
             it('when contributor is different from beneficiary', async function () {
@@ -130,7 +137,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
             await this.crowdsale.releaseTokens([anotherAuthorized], {from: owner});
             let balance = await this.token.balanceOf(anotherAuthorized);
-            let expectedValue = value * 10800 * 2;
+            let expectedValue = value * 12000 * 2;
             balance.should.be.bignumber.equal(expectedValue);
         });
 
@@ -141,18 +148,72 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
         });
     });
 
-    describe('bonus structure', function () {
 
-         it('during day 1 is 10800', async function () {
-             let rate = await this.crowdsale.getRate();
-             assert.equal(rate, 10800);
-         });
 
-         it('day 2 onwards is 10000', async function () {
-             await increaseTimeTo(latestTime() + duration.days(1) + duration.seconds(1));
-             let rate = await this.crowdsale.getRate();
-             assert.equal(rate, 10000);
-         });
+    describe('during funding period', function () {
+        describe('bonus structure', function () {
+            it('for day 1 is 10800', async function () {
+
+                await increaseTimeTo(1532260801); // 22 Jul 2018 1200h, the start time as coded in the contract
+    
+                let rate = await this.crowdsale.getRate();
+                assert.equal(rate, 10800);
+             });
+
+             it('for day 2 onwards is 10000', async function () {
+                await increaseTimeTo(latestTime() + duration.days(1) + duration.seconds(1));
+                let rate = await this.crowdsale.getRate();
+                assert.equal(rate, 10000);
+            });
+        });
+
+        describe('should accept payments', function () {
+
+            it('from whitelisted contributors', async function () {
+                await this.crowdsale.changePrivateContribution(ether(0), {from: owner});
+                
+
+                await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.fulfilled;
+            });
+
+            it('when contribution will equate weiRaiased to funding goal during funding period', async function () {
+                
+                await this.crowdsale.changePrivateContribution(ether(75997), {from: owner});
+
+                await this.crowdsale.sendTransaction({value: belowPrefundMinimumValue, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.buyTokens(authorized, { value: belowPrefundMinimumValue, from: authorized }).should.be.fulfilled;
+            });
+        });
+
+        describe('should not accept payments', function () {
+
+            it('when contribution is below minimum amount during funding period', async function () {
+                await this.crowdsale.sendTransaction({value: belowMinimumValue, from: authorized}).should.be.rejected;
+                await this.crowdsale.buyTokens(authorized, { value: belowMinimumValue, from: authorized }).should.be.rejected;
+            });
+
+            it('when contribution will exceed funding goal', async function () {
+
+                await this.crowdsale.changePrivateContribution(ether(75997.1), {from: owner});
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
+                await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
+            });
+        });
+
+        describe('high level contribution process', function () {
+            it('funding contribution, tokens delivered', async function () {
+
+                await this.crowdsale.sendTransaction({value: value, from: anotherAuthorized}).should.be.fulfilled;
+                await this.crowdsale.buyTokens(anotherAuthorized, { value: value, from: anotherAuthorized }).should.be.fulfilled;
+    
+                await this.token.transfer(this.crowdsale.address, ether(100000), {from: owner});
+                await this.crowdsale.releaseTokens([anotherAuthorized], {from: owner});
+                let balance = await this.token.balanceOf(anotherAuthorized);
+                let expectedValue = value * 10000 * 2;
+                balance.should.be.bignumber.equal(expectedValue);
+            });
+        });
     });
 
     describe('close function', function () {
