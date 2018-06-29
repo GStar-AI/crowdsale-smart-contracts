@@ -37,7 +37,9 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     //Funding goal is 76,000 ETH, includes private contributions
     uint256 constant public fundingGoal = 76000 ether;
+    uint256 constant public presaleFundingGoal = 1000 ether;
     bool public fundingGoalReached = false;
+    bool public presaleFundingGoalReached = false;
 
     //private contributions
     uint256 public privateContribution = 0;
@@ -55,6 +57,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
 
     event TokenPurchase(address indexed purchaser, address indexed beneficiary, uint256 value, uint256 amount);
     event GoalReached(uint256 totalEtherAmountRaised);
+    event PresaleGoalReached(uint256 totalEtherAmountRaised);
     event StartCrowdsale();
     event StopCrowdsale();
     event ReleaseTokens(address[] _beneficiaries);
@@ -63,7 +66,7 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     /**
     * @dev Constructor. Checks validity of the time entered.
     */
-    constructor (
+    function GStarCrowdsale (
         uint256 _rate,
         address _wallet,
         GStarToken token
@@ -196,10 +199,13 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
         bool atLeastMinimumAmount = false;
 
         if(block.timestamp <= startTime) {
+            // during presale period
 
+            require(_weiAmount.add(weiRaised.add(privateContribution)) <= presaleFundingGoal);
             atLeastMinimumAmount = _weiAmount >= MINIMUM_PRESALE_PURCHASE_AMOUNT_IN_WEI;
             
         } else {
+            // during funding period
             atLeastMinimumAmount = _weiAmount >= MINIMUM_PURCHASE_AMOUNT_IN_WEI;
         }
 
@@ -243,9 +249,17 @@ contract GStarCrowdsale is WhitelistedCrowdsale {
     * @dev Updates fundingGoal status.
     */
     function _updateFundingGoal() internal {
-        if (weiRaised >= fundingGoal) {
+        if (weiRaised.add(privateContribution) >= fundingGoal) {
             fundingGoalReached = true;
-            emit GoalReached(weiRaised);
+            emit GoalReached(weiRaised.add(privateContribution));
+        }
+
+        if(block.timestamp <= startTime) {
+            if(weiRaised.add(privateContribution) >= presaleFundingGoal) {
+                
+                presaleFundingGoalReached = true;
+                emit PresaleGoalReached(weiRaised.add(privateContribution));
+            }
         }
     }
 
