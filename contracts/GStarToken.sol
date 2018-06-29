@@ -25,7 +25,7 @@ contract GStarToken is StandardToken, Ownable {
         totalSupply_ = INITIAL_SUPPLY;
         balances[owner] = INITIAL_SUPPLY;
         currentTotalSupply = INITIAL_SUPPLY;
-        Transfer(address(0), owner, INITIAL_SUPPLY);
+        emit Transfer(address(0), owner, INITIAL_SUPPLY);
     }
 
     /**
