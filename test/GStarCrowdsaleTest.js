@@ -51,7 +51,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
     describe('prevalidation of token contribution during presale period', function () {
         
-        describe('rate is 12000', function () {
+        describe('bonus structure', function () {
             it('during presale period is 12000', async function () {
                 let rate = await this.crowdsale.getRate();
                 assert.equal(rate, 12000);
