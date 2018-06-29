@@ -66,7 +66,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
             });
 
             it('when contribution will equate weiRaised to funding goal', async function () {
-                await this.crowdsale.changePrivateContribution(ether(75997), {from: owner});
+                await this.crowdsale.changePrivateContribution(ether(997), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.buyTokens(authorized, { value: value, from: authorized }).should.be.fulfilled;
             });
@@ -96,7 +96,7 @@ contract('GStarCrowdsale', function ([_, wallet, accounts]) {
 
             it('when contribution will exceed funding goal', async function () {
 
-                await this.crowdsale.changePrivateContribution(ether(75997.1), {from: owner});
+                await this.crowdsale.changePrivateContribution(ether(997.1), {from: owner});
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.fulfilled;
                 await this.crowdsale.sendTransaction({value: value, from: authorized}).should.be.rejected;
             });
